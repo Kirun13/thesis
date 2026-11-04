@@ -1,0 +1,55 @@
+name: thesis-response
+x-common: &common
+  image: thesis-response:local
+  build: .
+  init: true
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  environment:
+    OMP_NUM_THREADS: '1'
+    MKL_NUM_THREADS: '1'
+    OPENBLAS_NUM_THREADS: '1'
+  volumes:
+    - ../data/response:/artifacts:ro
+    - ../runs/response:/results
+services:
+  edge:
+    <<: *common
+    command: [python, lab.py, edge]
+    cap_add: [NET_ADMIN]
+    cpuset: '0'
+    mem_limit: 1536m
+    networks:
+      data: {ipv4_address: 172.30.93.2}
+      control: {ipv4_address: 172.30.94.2}
+  controller:
+    <<: *common
+    command: [python, lab.py, controller]
+    cap_add: [NET_ADMIN]
+    cpuset: '1'
+    mem_limit: 256m
+    networks:
+      control: {ipv4_address: 172.30.94.3}
+  health:
+    <<: *common
+    command: [python, lab.py, health]
+    cpuset: '3'
+    mem_limit: 128m
+    networks:
+      data: {ipv4_address: 172.30.93.11}
+  client:
+    <<: *common
+    command: [python, lab.py, runner, smoke]
+    cpuset: '2'
+    mem_limit: 256m
+    networks:
+      data: {ipv4_address: 172.30.93.10}
+networks:
+  data:
+    internal: true
+    ipam:
+      config: [{subnet: 172.30.93.0/24}]
+  control:
+    internal: true
+    ipam:
+      config: [{subnet: 172.30.94.0/24}]

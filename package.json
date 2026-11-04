@@ -1,0 +1,32 @@
+{
+  "name": "edge-ids-experiment",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reproducible Edge-IIoTset detection experiment",
+  "scripts": {
+    "data:download": "python -u scripts/download_data.py",
+    "data:prepare": "python -u scripts/prepare_data.py",
+    "check": "python -m unittest discover -s tests -v",
+    "smoke": "python -u scripts/train.py --profile smoke",
+    "experiment": "python -u scripts/train.py --profile overnight",
+    "experiment:start": "node scripts/manage.mjs start",
+    "experiment:status": "node scripts/manage.mjs status",
+    "experiment:stop": "node scripts/manage.mjs stop",
+    "report": "python scripts/report.py",
+    "response:prepare": "python -u scripts/prepare_response.py",
+    "response:build": "docker compose -f response/compose.yaml build edge",
+    "response:smoke": "python -u scripts/response.py smoke",
+    "response:run": "python -u scripts/response.py run",
+    "response:report": "python scripts/report_response.py",
+    "response:down": "docker compose -f response/compose.yaml down",
+    "online:audit": "python -u scripts/audit_original.py",
+    "online:plan": "python scripts/plan_online.py",
+    "online:build": "docker build -t thesis-online:local online",
+    "online:collect": "python -u scripts/online.py collect",
+    "online:study": "python -u scripts/online.py study",
+    "online:smoke": "python -u scripts/online.py smoke",
+    "online:system": "python -u scripts/online.py system",
+    "online:report": "python scripts/report_online.py",
+    "online:down": "docker compose -f online/compose.yaml down"
+  }
+}

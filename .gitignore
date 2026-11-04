@@ -1,0 +1,10 @@
+data/raw/
+data/processed/
+data/response/
+data/pcap-audit/
+data/online/
+runs/
+__pycache__/
+*.pyc
+.venv/
+node_modules/

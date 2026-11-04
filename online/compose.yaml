@@ -1,0 +1,76 @@
+name: thesis-online
+x-common: &common
+  image: thesis-online:local
+  init: true
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  cap_add: [NET_ADMIN]
+  environment: {OMP_NUM_THREADS: '1', MKL_NUM_THREADS: '1', OPENBLAS_NUM_THREADS: '1'}
+  volumes: ["../runs/online:/results", "../data/online:/artifacts:ro"]
+services:
+  runner:
+    <<: *common
+    command: [python, online/run.py, commissioning]
+    cap_add: []
+    cpuset: '3'
+    mem_limit: 256m
+    networks:
+      management: {ipv4_address: 172.30.98.99}
+  edge:
+    <<: *common
+    command: [python, online/bench.py, edge]
+    cap_add: [NET_ADMIN, NET_RAW]
+    sysctls: {net.ipv4.ip_forward: '1'}
+    cpuset: '0'
+    mem_limit: 1536m
+    networks:
+      source: {ipv4_address: 172.30.95.2}
+      protected: {ipv4_address: 172.30.96.2}
+      control: {ipv4_address: 172.30.97.2}
+      management: {ipv4_address: 172.30.98.2}
+  controller:
+    <<: *common
+    command: [python, online/bench.py, controller]
+    cpuset: '1'
+    mem_limit: 128m
+    networks:
+      control: {ipv4_address: 172.30.97.3}
+      management: {ipv4_address: 172.30.98.3}
+  broker:
+    <<: *common
+    command: [python, online/bench.py, broker]
+    cpuset: '1'
+    cpus: 0.25
+    mem_limit: 256m
+    networks:
+      protected: {ipv4_address: 172.30.96.3}
+      management: {ipv4_address: 172.30.98.20}
+  source1:
+    <<: *common
+    command: [python, online/bench.py, source, '0']
+    cpuset: '2'
+    mem_limit: 128m
+    networks:
+      source: {ipv4_address: 172.30.95.10}
+      management: {ipv4_address: 172.30.98.10}
+  source2:
+    <<: *common
+    command: [python, online/bench.py, source, '1']
+    cpuset: '2'
+    mem_limit: 128m
+    networks:
+      source: {ipv4_address: 172.30.95.11}
+      management: {ipv4_address: 172.30.98.11}
+  source3:
+    <<: *common
+    command: [python, online/bench.py, source, '2']
+    cpuset: '3'
+    mem_limit: 128m
+    networks:
+      source: {ipv4_address: 172.30.95.12}
+      management: {ipv4_address: 172.30.98.12}
+networks:
+  source: {internal: true, ipam: {config: [{subnet: 172.30.95.0/24}]}}
+  protected: {internal: true, ipam: {config: [{subnet: 172.30.96.0/24}]}}
+  control: {internal: true, ipam: {config: [{subnet: 172.30.97.0/24}]}}
+  management: {internal: true, ipam: {config: [{subnet: 172.30.98.0/24}]}}
