@@ -94,6 +94,7 @@ class RPC:
     def __init__(self, host, port, timeout=RPC_TIMEOUT):
         self.host, self.port, self.timeout = host, port, timeout
         self.sock = self.reader = None
+        self.buffer = b''
 
     def close(self):
         if self.reader:
@@ -101,16 +102,30 @@ class RPC:
         if self.sock:
             self.sock.close()
         self.sock = self.reader = None
+        self.buffer = b''
 
     def call(self, op, **payload):
         identifier = payload.pop('request_id', uuid.uuid4().hex)
+        deadline = time.monotonic() + self.timeout
+        def remaining():
+            budget = deadline - time.monotonic()
+            if budget <= 0:
+                raise TimeoutError('RPC total deadline exceeded')
+            return budget
         try:
             if self.sock is None:
-                self.sock = socket.create_connection((self.host, self.port), timeout=self.timeout)
+                self.sock = socket.create_connection((self.host, self.port), timeout=remaining())
                 self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-                self.reader = self.sock.makefile('rb')
+            self.sock.settimeout(remaining())
             self.sock.sendall((json.dumps({'op': op, 'id': identifier, **payload}, allow_nan=False) + '\n').encode())
-            raw = self.reader.readline(262145)
+            while b'\n' not in self.buffer:
+                self.sock.settimeout(remaining())
+                chunk = self.sock.recv(4096)
+                if not chunk or len(self.buffer) + len(chunk) > 262144:
+                    raise RuntimeError('Closed or invalid RPC response')
+                self.buffer += chunk
+            raw, self.buffer = self.buffer.split(b'\n', 1)
+            remaining()
             if not raw or len(raw) > 262144:
                 raise RuntimeError('Closed or invalid RPC response')
             reply = json.loads(raw)
@@ -118,6 +133,7 @@ class RPC:
                 raise RuntimeError('Stale/mismatched RPC response ID rejected')
             if 'rpc_error' in reply:
                 raise RuntimeError(reply['rpc_error'])
+            remaining()
             return reply
         except Exception:
             self.close()
@@ -299,7 +315,9 @@ class Application:
         identifier = request['id']
         result = {'trial_id': identifier, 'mode': request['mode'], 'seed': int(self.current)}
         if self.count_rule:  # outside the timed interval
+            result['counter_start_begin_ns'] = time.monotonic_ns()
             result['arrived_before'] = self.chain_counters()[1] or 0
+            result['counter_start_end_ns'] = time.monotonic_ns()
         t0 = time.monotonic_ns()  # Complete vector decoded and validated, before tensor creation.
         score = self.infer(vector)
         t_inference = time.monotonic_ns()
@@ -352,6 +370,7 @@ class Application:
 
     def verify(self, trial_id, token):
         result = dict(self.pending.pop(trial_id))
+        counter_end_begin = time.monotonic_ns()
         drops, counted = self.chain_counters()
         stamp = time.monotonic_ns()
         delivered = self.echo.count(CLIENT, token)
@@ -363,7 +382,13 @@ class Application:
             before = result.pop('arrived_before')
             arrived = None if counted is None else counted - before
             result.update(chain_arrived_packets=arrived,
-                          passed_before_block_packets=None if arrived is None else arrived - drops)
+                          passed_in_counter_interval_packets=None if arrived is None else arrived - drops,
+                          counter_end_begin_ns=counter_end_begin, counter_end_end_ns=stamp,
+                          counter_interval_ms=(stamp-result['counter_start_end_ns'])/1e6,
+                          counter_pre_t0_upper_bound_ms=(result['t0_ns']-result['counter_start_begin_ns'])/1e6,
+                          counter_boundary_uncertainty_ms=((result['counter_start_end_ns']-result['counter_start_begin_ns'])+(stamp-counter_end_begin))/1e6)
+            interval = stamp - result['counter_start_end_ns']
+            result['counter_ingress_rate_pps'] = arrived * 1e9 / interval if arrived is not None and interval > 0 else None
         if result['status'] == 'awaiting_verification':
             if result['action'] == 'block':
                 result['status'] = 'ok_block' if drops > 0 and delivered == 0 and health > 0 else 'verification_failure'
@@ -639,7 +664,7 @@ def rate_smoke(edge, health, probes, target, manifest):
                 identifier = f'rate-smoke-r{rate}-o{index}-{mode}'
                 result = one_trial(edge, probes, {'trial_id': identifier, 'mode': mode}, observation['features'])
                 assert result['status'] == f'ok_{observation["expected_action"]}', result
-                arrived, passed = result['chain_arrived_packets'], result['passed_before_block_packets']
+                arrived, passed = result['chain_arrived_packets'], result['passed_in_counter_interval_packets']
                 assert arrived is not None and arrived > 0 and passed >= 0, result
                 assert passed == arrived - result['drop_packets'], result
                 if observation['expected_action'] == 'block':

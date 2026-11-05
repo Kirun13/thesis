@@ -28,7 +28,7 @@ A central trial whose controller reply does not arrive within 1 s is a `controll
 
 ## Report
 
-Pooled over the three model seeds (also per seed in `summary-by-seed.csv`): median and p95 of feature-ready-to-firewall-command-completion for verified blocks by delay and mode; share of block decisions whose controller reply arrived inside the timeout; share of attack observations left unblocked because of a timeout; and timeouts over assigned trials. Paired central − local differences use only pairs with two verified blocks. The regression fits paired added time on the median policy-RPC RTT measured in the same block's calibration; pairs in a block share one RTT value, so the standard error is optimistic. Calibration RTT, not nominal delay, is the regressor.
+Pooled over the three model seeds (also per seed in `summary-by-seed.csv`): median and p95 of feature-ready-to-firewall-command-completion for verified blocks by delay and mode; share of block decisions whose controller reply arrived inside the timeout; share of attack observations left unblocked because of a timeout; and timeouts over assigned trials. Paired central − local differences use only pairs with two verified blocks. The regression fits paired added time on the median policy-RPC RTT measured in the same block's calibration; pairs in a block share one RTT value, so ordinary independent-sample standard errors are omitted. Calibration RTT, not nominal delay, is the regressor.
 
 ## Stage 2: flow-rate profile (separate)
 
@@ -36,6 +36,14 @@ Pooled over the three model seeds (also per seed in `summary-by-seed.csv`): medi
 
 - `chain_arrived_packets`: packets from the client that reached the chain during the trial (counter delta, snapshot taken before t0);
 - `drop_packets`: hits on the DROP rule;
-- `passed_before_block_packets`: arrived − dropped, i.e. packets that passed before the rule took effect (all of them for an allow decision).
+- `passed_in_counter_interval_packets`: arrived minus dropped over the bracketed counter interval (which begins before t0).
 
-The achieved probe rate is recorded (`post_probe_rate_pps_achieved`); a Python sender may fall short of 2,500 pkt/s on a given host, so the report should be read with the achieved, not the target, rate. Probe load shares edge CPU 0 with inference, which is the point of the profile and also a confound with the counting rule's own cost.
+The achieved ingress rate is recorded (`counter_ingress_rate_pps`); a Python sender may fall short of 2,500 pkt/s on a given host, so the report should be read with the achieved, not the target, rate. Probe load shares edge CPU 0 with inference, which is the point of the profile and also a confound with the counting rule's own cost.
+
+## Review corrections
+
+The one-second trial deadline covers reconnect, send and the entire framed reply together, using a monotonic deadline. Calibration retains a separate ten-second total deadline. Non-timeout controller errors are not successful authorizations. An attack is attributed to a timeout only if the detector actually requested block; detector misses are counted separately. Ordinary OLS standard errors are suppressed because RTT measurements are shared within blocks.
+
+Rate-profile counters report `passed_in_counter_interval_packets`, not an exact t0-to-installation count. The journal brackets both counter reads and records the pre-t0 interval and counter boundary uncertainty. Achieved ingress rate is estimated over that counter interval, including packets later dropped; post-command sender rate remains only a verification diagnostic. UDP packets are not MQTT messages and the probe stream is not classified. Run projects sequentially because their CPU affinities overlap.
+
+Execution status: code and tests are prepared; no new full or rate-profile measurements accompany this change. The base profile assigns 6,000 trials (7,200 with 500 ms); the separate rate profile assigns 2,400 by default. Interpret 500 ms as a configured deadline stress condition, not a universal network failure threshold.

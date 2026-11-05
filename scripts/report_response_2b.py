@@ -48,13 +48,14 @@ def cell_row(scheduled, latest):
             'block_decisions': len(decisions), 'verified_blocks': len(blocks),
             'verified_block_share': ratio(len(blocks), len(decisions)),
             'block_decisions_lost_to_timeout': len(decisions_lost),
-            'block_within_timeout_share': None if not decisions else 1 - len(decisions_lost) / len(decisions),
+            'block_within_timeout_share': None if not decisions else ratio(sum(row.get('controller_ms') is not None or row['status'] in ['ok_block', 'ok_allow', 'enforcement_failure'] for row in decisions), len(decisions)),
             'timeout_failures': len(timeouts),
             'other_failures': sum(row['status'] not in ['ok_block', 'ok_allow'] for row in terminal) - len(timeouts),
             'attacks_assigned': attacks_assigned,
             'attacks_mitigated': sum(row['status'] == 'ok_block' for row in attacks),
-            'attacks_unblocked_by_timeout': sum(is_timeout(row) for row in attacks),
-            'attacks_unblocked_by_timeout_share': ratio(sum(is_timeout(row) for row in attacks), attacks_assigned),
+            'attacks_unblocked_by_timeout': sum(is_timeout(row) and row.get('expected_action') == 'block' for row in attacks),
+            'attacks_unblocked_by_timeout_share': ratio(sum(is_timeout(row) and row.get('expected_action') == 'block' for row in attacks), attacks_assigned),
+            'detector_missed_attacks': sum(row.get('expected_action') == 'allow' for row in attacks),
             'false_block_decisions': sum(row.get('label') == 0 and row.get('expected_action') == 'block' for row in terminal),
             'block_median_ms': percentile(blocks, 'feature_to_firewall_command_ms', 50),
             'block_p95_ms': percentile(blocks, 'feature_to_firewall_command_ms', 95),
@@ -69,9 +70,9 @@ def cell_row(scheduled, latest):
     if any('chain_arrived_packets' in row for row in terminal):  # rate profile only
         cell.update(arrived_median=percentile(blocks, 'chain_arrived_packets', 50),
                     dropped_median=percentile(blocks, 'drop_packets', 50),
-                    passed_before_block_median=percentile(blocks, 'passed_before_block_packets', 50),
-                    passed_before_block_p95=percentile(blocks, 'passed_before_block_packets', 95),
-                    achieved_rate_pps_median=percentile(terminal, 'post_probe_rate_pps_achieved', 50))
+                    passed_in_counter_interval_median=percentile(blocks, 'passed_in_counter_interval_packets', 50),
+                    passed_in_counter_interval_p95=percentile(blocks, 'passed_in_counter_interval_packets', 95),
+                    achieved_rate_pps_median=percentile(terminal, 'counter_ingress_rate_pps', 50))
     return cell
 
 
@@ -89,7 +90,7 @@ def regression(points):
     ss_res, ss_tot = float((residual ** 2).sum()), float(((y - y.mean()) ** 2).sum())
     result.update(slope=float(slope), intercept=float(intercept),
                   r2=None if ss_tot == 0 else 1 - ss_res / ss_tot,
-                  slope_se=math.sqrt(ss_res / (n - 2) / float(((x - x.mean()) ** 2).sum())))
+                  slope_se=None)  # descriptive fit; shared block RTTs are not independent samples
     return result
 
 
@@ -196,8 +197,8 @@ def render_markdown(result, manifest=None):
                      f'{number(row["block_median_ms"])} | {number(row["block_p95_ms"])} | {percent(row["block_within_timeout_share"])} | '
                      f'{row["attacks_unblocked_by_timeout"]}/{row["attacks_assigned"]} ({percent(row["attacks_unblocked_by_timeout_share"])}) | '
                      f'{row["timeout_failures"]}/{row["assigned"]} |')
-    lines += ['', '"Blocks within timeout" = block decisions whose controller reply arrived inside the 1 s timeout. '
-              '"Attacks unblocked by timeout" = attack observations (label 1) left unmitigated because of a controller timeout, '
+    lines += ['', '"Blocks within timeout" = block decisions with a recorded successful authorization (local decisions are immediate); other controller failures are excluded. '
+              '"Attacks unblocked by timeout" = attack observations (label 1) with a block decision prevented by a controller timeout, '
               'over all assigned attack observations for that condition. Latency statistics use verified blocks only; '
               'timed-out trials are never given a latency.', '',
               '## Matched local/central differences', '',
@@ -211,8 +212,8 @@ def render_markdown(result, manifest=None):
     lines += ['', '## Added time vs measured RTT (regression)', '',
               'OLS of the paired added time (central - local, ms) on the median policy-RPC RTT measured in that block\'s calibration. '
               'A slope near 1 means each measured millisecond of RTT adds about one millisecond; the intercept is the '
-              'controller/serialization cost at zero RTT. Pairs within a block share one RTT value and the three models share one VM, '
-              'so the standard error understates real uncertainty.', '',
+              'fitted residual offset after measured RTT. Pairs within a block share one RTT value and the three models share one VM, '
+              'so no ordinary independent-sample standard error is reported.', '',
               ('| Rate ' if rated else '') + '| Pairs | Slope | Slope SE | Intercept (ms) | R² | RTT range (ms) | Delays (ms) |',
               ('|---:' if rated else '') + '|---:|---:|---:|---:|---:|---|---|']
     for row in result['regression']:
@@ -227,14 +228,14 @@ def render_markdown(result, manifest=None):
     if rated:
         lines += ['', '## Packet accounting (rate profile)', '',
                   'Counted for packets from the replay client at the edge chain: `arrived` = packets seen by a target-less counting rule placed '
-                  'before the DROP, `dropped` = DROP-rule hits, `passed before block` = arrived - dropped. Medians over verified blocks.', '',
-                  '| Rate (pkt/s) | Delay (ms) | Mode | Achieved rate (pkt/s) | Arrived | Dropped | Passed before block (median / p95) |',
+                  'before the DROP, `dropped` = DROP-rule hits, `passed in counter interval` = arrived - dropped. The interval starts before t0 and ends at verification; counter-read boundary uncertainty is journaled. These are not exact t0-to-installation packet counts. Achieved rate uses ingress counters over this interval. Medians over verified blocks.', '',
+                  '| Rate (pkt/s) | Delay (ms) | Mode | Achieved rate (pkt/s) | Arrived | Dropped | Passed in counter interval (median / p95) |',
                   '|---:|---:|---|---:|---:|---:|---:|']
         for row in result['pooled']:
             lines.append(f'| {row["probe_rate_pps"]} | {row["one_way_delay_ms"]} | {row["mode"]} | '
                          f'{number(row.get("achieved_rate_pps_median"), 0)} | {number(row.get("arrived_median"), 0)} | '
-                         f'{number(row.get("dropped_median"), 0)} | {number(row.get("passed_before_block_median"), 0)} / '
-                         f'{number(row.get("passed_before_block_p95"), 0)} |')
+                         f'{number(row.get("dropped_median"), 0)} | {number(row.get("passed_in_counter_interval_median"), 0)} / '
+                         f'{number(row.get("passed_in_counter_interval_p95"), 0)} |')
     lines += ['', '## Measurement limits', '',
               '- Same boundary as experiment 2: t0 is a validated feature vector at edge; command return is an installation upper bound; '
               'capture, extraction and preprocessing are excluded; probe bytes are not classified.',

@@ -3,6 +3,9 @@ import json
 import random
 import re
 import socket
+import threading
+import time
+from unittest.mock import patch, Mock
 import sys
 import tempfile
 import unittest
@@ -144,6 +147,52 @@ class ArtifactChecks(unittest.TestCase):
 
 
 class LabChecks(unittest.TestCase):
+    def test_rate_verification_records_real_counter_interval(self):
+        edge = lab_2b.Application.__new__(lab_2b.Application)
+        edge.pending = {'trial': {'status': 'awaiting_verification', 'action': 'block',
+            't0_ns': 300, 'health_before': 0, 'arrived_before': 10,
+            'counter_start_begin_ns': 100, 'counter_start_end_ns': 200}}
+        edge.chain_counters = Mock(return_value=(5, 20))
+        edge.echo = Mock()
+        edge.echo.count.side_effect = [0, 1]
+        with patch.object(lab_2b.time, 'monotonic_ns', side_effect=[1000, 1200]):
+            result = edge.verify('trial', 'post')
+        self.assertEqual(result['status'], 'ok_block')
+        self.assertEqual(result['passed_in_counter_interval_packets'], 5)
+        self.assertAlmostEqual(result['counter_ingress_rate_pps'], 10_000_000)
+        self.assertAlmostEqual(result['counter_pre_t0_upper_bound_ms'], 0.0002)
+        self.assertNotIn('passed_before_block_packets', result)
+
+    def test_total_rpc_deadline_includes_connect_and_reply(self):
+        listener = socket.socket()
+        listener.bind(('127.0.0.1', 0))
+        listener.listen()
+        def serve():
+            connection, _ = listener.accept()
+            with connection, connection.makefile('rb') as reader:
+                request = json.loads(reader.readline())
+                time.sleep(0.15)
+                try:
+                    connection.sendall((json.dumps({'id': request['id']}) + '\n').encode())
+                except OSError:
+                    pass
+        worker = threading.Thread(target=serve, daemon=True)
+        worker.start()
+        connect = socket.create_connection
+        def delayed_connect(*args, **kwargs):
+            time.sleep(0.15)
+            return connect(*args, **kwargs)
+        rpc = lab_2b.RPC(*listener.getsockname(), timeout=0.23)
+        try:
+            with patch.object(lab_2b.socket, 'create_connection', side_effect=delayed_connect):
+                with self.assertRaises(TimeoutError):
+                    rpc.call('policy')
+            self.assertIsNone(rpc.sock)
+        finally:
+            rpc.close()
+            worker.join(timeout=1)
+            listener.close()
+
     def test_trial_timeout_stays_one_second_and_calibration_is_longer(self):
         self.assertEqual(lab_2b.RPC_TIMEOUT, 1)
         self.assertEqual(lab_2b.RPC('x', 1).timeout, 1)
@@ -224,6 +273,17 @@ class ReportChecks(unittest.TestCase):
                                  'edge': {'delay_ms': delay, 'rpc_rtt_ms': [self.DELAYS[delay]] * 6, 'trial_connection_warm_ok': delay != 500}})
         return ledger, attempts, calibrations
 
+    def test_controller_errors_and_detector_misses_are_not_timeout_successes(self):
+        scheduled = [{'trial_id': 'a', 'label': 1}]
+        for status in ['controller_failure', 'transport_failure']:
+            cell = report.cell_row(scheduled, {'a': {'trial_id': 'a', 'label': 1,
+                'status': status, 'expected_action': 'block', 'failure_kind': 'other'}})
+            self.assertEqual(cell['block_within_timeout_share'], 0.0)
+        cell = report.cell_row(scheduled, {'a': {'trial_id': 'a', 'label': 1,
+            'status': 'controller_failure', 'expected_action': 'allow', 'failure_kind': 'timeout'}})
+        self.assertEqual(cell['attacks_unblocked_by_timeout'], 0)
+        self.assertEqual(cell['detector_missed_attacks'], 1)
+
     def test_medians_p95_and_timeout_shares(self):
         result = report.summarize(*self.build())
         pooled = {(row['one_way_delay_ms'], row['mode']): row for row in result['pooled']}
@@ -299,13 +359,13 @@ class ReportChecks(unittest.TestCase):
             rate = row['probe_rate_pps']
             attempts.append(attempt(row, 'ok_block' if row['label'] else 'ok_allow', latency=3.0 if row['label'] else None,
                                     chain_arrived_packets=rate // 100, drop_packets=rate // 100 - 1,
-                                    passed_before_block_packets=1, post_probe_rate_pps_achieved=rate * 0.9))
+                                    passed_in_counter_interval_packets=1, counter_ingress_rate_pps=rate * 0.9))
         for block in sorted({row['block_id'] for row in ledger}):
             calibrations.append({'segment': 's1', 'block_id': block,
                                  'edge': {'delay_ms': 0, 'rpc_rtt_ms': [1.0] * 6, 'trial_connection_warm_ok': True}})
         result = report.summarize(ledger, attempts, calibrations)
         fast = [row for row in result['pooled'] if row['probe_rate_pps'] == 2500 and row['mode'] == 'central'][0]
-        self.assertEqual((fast['arrived_median'], fast['dropped_median'], fast['passed_before_block_median']), (25, 24, 1))
+        self.assertEqual((fast['arrived_median'], fast['dropped_median'], fast['passed_in_counter_interval_median']), (25, 24, 1))
         self.assertAlmostEqual(fast['achieved_rate_pps_median'], 2250.0)
         self.assertIn('Packet accounting', report.render_markdown(result))
 
