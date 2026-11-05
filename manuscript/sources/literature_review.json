@@ -1,0 +1,119 @@
+{
+  "checked_date": "2026-11-05",
+  "headers": [
+    "Paper",
+    "Dataset",
+    "Metrics",
+    "Key result",
+    "Mitigation / response",
+    "Main contribution",
+    "Limitation relevant to us"
+  ],
+  "rows": [
+    [
+      "McMahan et al. [1]",
+      "Four image and language datasets",
+      "Accuracy; communication rounds",
+      "10–100 times fewer rounds than synchronized SGD in reported settings.",
+      "No traffic enforcement evaluation",
+      "Iterative averaging of local updates",
+      "Training communication is distinct from reaction latency."
+    ],
+    [
+      "Ferrag et al. [2]",
+      "Edge-IIoTset IoT and IIoT testbed",
+      "Classification accuracy; precision; recall; F1",
+      "Provides a public corpus for centralized and federated IDS evaluation.",
+      "Dataset and classifier study",
+      "Layered testbed and attack corpus",
+      "Its benchmark scores do not measure live detection-to-rule time."
+    ],
+    [
+      "Omotosho et al. [3]",
+      "Own MQTT scenarios; MQTT-IoT-IDS2020",
+      "Accuracy; precision; recall",
+      "Seven implemented attack types; over 80% mean accuracy on the external benchmark.",
+      "Classification evaluated; no rule-installation endpoint reported",
+      "Centralized and federated MQTT attack detection",
+      "Broader attack scope than ours; scores use different inputs and splits."
+    ],
+    [
+      "Dash and Acken [4]",
+      "ROSPaCe cyber-physical data",
+      "Attack detection latency; latency components",
+      "Separates attacker, IDS and post-detection latency.",
+      "Post-detection is part of the framework",
+      "Formal latency decomposition and dataset case study",
+      "Does not supply our paired MQTT firewall and service measurements."
+    ],
+    [
+      "Pope et al. [5]",
+      "Linux syscall traces from edge containers",
+      "Precision; recall; F1",
+      "Client data volume and model initialization affect FL performance.",
+      "Detection and model updates; no firewall timing result used here",
+      "Edge autoencoder IDS and federated updates",
+      "Host-based observations differ from our network windows."
+    ],
+    [
+      "Ma and Su [6]",
+      "CICIDS2017; InSDN; SDN testbed",
+      "Detection and network performance; recovery",
+      "Reports improved detection and mitigation of DDoS impact.",
+      "Distributed P4 rate limiting and attack-path pushback",
+      "Autoencoder–MLP FL, secure aggregation and cooperative defense",
+      "Publisher preview does not expose exact timing boundaries; numerical superiority is not inferred."
+    ],
+    [
+      "Puccetti and Ceccarelli [7]",
+      "Railway onboard and IIoT edge cases",
+      "Latency; FPR; precision; coverage",
+      "Detector configuration changes the accuracy–timeliness trade-off.",
+      "Detector evaluation; no source-DROP comparison used here",
+      "Joint analysis of detection timeliness and errors",
+      "Detection latency is distinct from command completion and delivery cost."
+    ],
+    [
+      "This study",
+      "Filtered Edge-IIoTset; synthetic MQTT",
+      "F1; coverage; paired latency; message delivery",
+      "99.27 ms median added time at 50 ms one-way delay, conditional on six valid responding pairs.",
+      "Verified source DROP; controller outage",
+      "Connects causal observations, enforcement and service cost",
+      "One VM; few independent workloads; no demonstrated availability gain."
+    ]
+  ],
+  "references": [
+    {
+      "id": 3,
+      "reference": "A. Omotosho, Y. Qendah, and C. Hammer. IDS-MA: Intrusion Detection System for IoT MQTT Attacks Using Centralized and Federated Learning. Author manuscript.",
+      "url": "https://knowledge.lancashire.ac.uk/id/eprint/48404/1/2023118673.pdf",
+      "access": "Full author manuscript"
+    },
+    {
+      "id": 4,
+      "reference": "S. Dash and J. M. Acken. Intrusion detection latency: the neglected metric. Cybersecurity, vol. 9, article 144, 2026.",
+      "url": "https://doi.org/10.1186/s42400-026-00574-7",
+      "access": "Full publisher text"
+    },
+    {
+      "id": 5,
+      "reference": "J. Pope et al. Intrusion Detection at the IoT Edge Using Federated Learning. Security and Privacy in Smart Environments, LNCS 14800, pp. 98–119, 2024.",
+      "url": "https://doi.org/10.1007/978-3-031-66708-4_5",
+      "access": "Author full text at https://ioannismavromatis.com/assets/pdf/publications/smartEnvironments.pdf"
+    },
+    {
+      "id": 6,
+      "reference": "J. Ma and W. Su. Collaborative DDoS defense for SDN-based AIoT with autoencoder-enhanced federated learning. Information Fusion, vol. 117, article 102820, 2025.",
+      "url": "https://doi.org/10.1016/j.inffus.2024.102820",
+      "access": "Publisher abstract, highlights and section previews; exact numeric metrics not verified"
+    },
+    {
+      "id": 7,
+      "reference": "T. Puccetti and A. Ceccarelli. Detection Latencies of Anomaly Detectors: An Overlooked Perspective? ISSRE, pp. 37–48, 2024.",
+      "url": "https://doi.org/10.1109/ISSRE62328.2024.00015",
+      "access": "Author abstract and publication metadata at https://arxiv.org/abs/2402.09082"
+    }
+  ],
+  "scope": "Focused comparison, not a systematic review. Original candidate inventory remains in original_google_doc.txt; unchecked numerical claims are not promoted into the manuscript."
+}

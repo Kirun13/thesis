@@ -1,12 +1,14 @@
 {
-  "document": "manuscript\\Federated_Edge_IDS_Manuscript_v1.docx",
+  "document": "manuscript\\Federated_Edge_IDS_Manuscript_v2.docx",
   "language": "English",
-  "scope": "Evidence-aligned local manuscript with Methods Results Discussion; literature review requires expansion.",
+  "scope": "Evidence-aligned local manuscript with Methods Results Discussion, a verified focused literature matrix and an explicitly unexecuted experiment 2b appendix.",
   "evidence": [
     "runs\\online\\final-v1\\summary.json",
     "ONLINE_PROTOCOL.md",
     "PROTOCOL.md",
     "RESPONSE_PROTOCOL.md",
+    "response_2b/PROTOCOL_2B.md",
+    "manuscript/sources/literature_review.json",
     "runs/response/full-20261104T153359Z/RESULTS.md",
     "runs/overnight-2026-11-04T14-57-07-088Z/summary.csv",
     "runs/extension-audit/excluded-cohort-sensitivity.json",
@@ -19,7 +21,40 @@
     "https://proceedings.mlr.press/v54/mcmahan17a.html",
     "https://doi.org/10.1109/ACCESS.2022.3165809"
   ],
-  "tables": 9,
-  "main_text_word_count": 4593,
-  "docx_sha256": "8d528c8f23e926514136ca34683076c1a9b5822daa8a8d810f0ee0fe50e7d3c1"
+  "literature_sources": [
+    {
+      "id": 3,
+      "reference": "A. Omotosho, Y. Qendah, and C. Hammer. IDS-MA: Intrusion Detection System for IoT MQTT Attacks Using Centralized and Federated Learning. Author manuscript.",
+      "url": "https://knowledge.lancashire.ac.uk/id/eprint/48404/1/2023118673.pdf",
+      "access": "Full author manuscript"
+    },
+    {
+      "id": 4,
+      "reference": "S. Dash and J. M. Acken. Intrusion detection latency: the neglected metric. Cybersecurity, vol. 9, article 144, 2026.",
+      "url": "https://doi.org/10.1186/s42400-026-00574-7",
+      "access": "Full publisher text"
+    },
+    {
+      "id": 5,
+      "reference": "J. Pope et al. Intrusion Detection at the IoT Edge Using Federated Learning. Security and Privacy in Smart Environments, LNCS 14800, pp. 98\u2013119, 2024.",
+      "url": "https://doi.org/10.1007/978-3-031-66708-4_5",
+      "access": "Author full text at https://ioannismavromatis.com/assets/pdf/publications/smartEnvironments.pdf"
+    },
+    {
+      "id": 6,
+      "reference": "J. Ma and W. Su. Collaborative DDoS defense for SDN-based AIoT with autoencoder-enhanced federated learning. Information Fusion, vol. 117, article 102820, 2025.",
+      "url": "https://doi.org/10.1016/j.inffus.2024.102820",
+      "access": "Publisher abstract, highlights and section previews; exact numeric metrics not verified"
+    },
+    {
+      "id": 7,
+      "reference": "T. Puccetti and A. Ceccarelli. Detection Latencies of Anomaly Detectors: An Overlooked Perspective? ISSRE, pp. 37\u201348, 2024.",
+      "url": "https://doi.org/10.1109/ISSRE62328.2024.00015",
+      "access": "Author abstract and publication metadata at https://arxiv.org/abs/2402.09082"
+    }
+  ],
+  "experiment_2b_status": "Implemented and unit tested; network runs not performed",
+  "tables": 11,
+  "main_text_word_count": 5274,
+  "docx_sha256": "83a271eeb7458b3218079165b9724e7820e74e39c1ae688eb1244387b8fa6985"
 }
