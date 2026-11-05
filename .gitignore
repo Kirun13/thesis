@@ -8,3 +8,8 @@ __pycache__/
 *.pyc
 .venv/
 node_modules/
+
+# Document previews and editor temporary files
+manuscript/qa/*
+!manuscript/qa/verification.json
+~$*
