@@ -29,7 +29,7 @@ def container_convert(doc_path, user_profile, convert_tmp_dir, stem, verbose=Fal
            'applied-soft-doc-render:local', '/usr/bin/soffice',
            '-env:UserInstallation=file:///tmp/thesis-document-profile',
            '--headless', '--norestore', '--convert-to', 'pdf', '--outdir', '/out', '/input/' + source.name]
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=120)
     output = result.stdout + result.stderr
     if verbose:
         print(output)
@@ -44,6 +44,6 @@ def container_convert(doc_path, user_profile, convert_tmp_dir, stem, verbose=Fal
 
 renderer.convert_to_pdf = container_convert
 if __name__ == '__main__':
-    sys.argv = [str(SKILL / 'render_docx.py'), str(ROOT / 'manuscript/Federated_Edge_IDS_Manuscript_v1.docx'),
+    sys.argv = [str(SKILL / 'render_docx.py'), str(ROOT / 'manuscript/Federated_Edge_IDS_Manuscript_v2.docx'),
                 '--output_dir', str(ROOT / 'manuscript/qa/pages'), '--dpi', '140', '--emit_pdf']
     renderer.main()

@@ -1,0 +1,56 @@
+# Experiment 2b: separate project, image and subnets so that it can coexist with experiment 2 (thesis-response).
+name: thesis-response-2b
+x-common: &common
+  image: thesis-response-2b:local
+  build: .
+  init: true
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  environment:
+    OMP_NUM_THREADS: '1'
+    MKL_NUM_THREADS: '1'
+    OPENBLAS_NUM_THREADS: '1'
+  volumes:
+    - ../data/response_2b:/artifacts:ro
+    - ../runs/response_2b:/results
+services:
+  edge:
+    <<: *common
+    command: [python, lab_2b.py, edge]
+    cap_add: [NET_ADMIN]
+    cpuset: '0'
+    mem_limit: 1536m
+    networks:
+      data: {ipv4_address: 172.30.103.2}
+      control: {ipv4_address: 172.30.104.2}
+  controller:
+    <<: *common
+    command: [python, lab_2b.py, controller]
+    cap_add: [NET_ADMIN]
+    cpuset: '1'
+    mem_limit: 256m
+    networks:
+      control: {ipv4_address: 172.30.104.3}
+  health:
+    <<: *common
+    command: [python, lab_2b.py, health]
+    cpuset: '3'
+    mem_limit: 128m
+    networks:
+      data: {ipv4_address: 172.30.103.11}
+  client:
+    <<: *common
+    command: [python, lab_2b.py, runner, smoke]
+    cpuset: '2'
+    mem_limit: 256m
+    networks:
+      data: {ipv4_address: 172.30.103.10}
+networks:
+  data:
+    internal: true
+    ipam:
+      config: [{subnet: 172.30.103.0/24}]
+  control:
+    internal: true
+    ipam:
+      config: [{subnet: 172.30.104.0/24}]

@@ -1,0 +1,10 @@
+{
+  "document": "manuscript\\Federated_Edge_IDS_Manuscript_v2.docx",
+  "pages": 15,
+  "tables": 11,
+  "all_table_cell_text_survives_pdf_render": true,
+  "all_pages_visually_reviewed": true,
+  "docx_sha256": "83a271eeb7458b3218079165b9724e7820e74e39c1ae688eb1244387b8fa6985",
+  "experiment_2b_status": "Implemented; new network runs not performed",
+  "literature_sources": 7
+}

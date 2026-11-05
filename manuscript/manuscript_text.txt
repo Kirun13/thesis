@@ -14,13 +14,23 @@ Federated averaging trains a shared model by aggregating locally computed model 
 
 The study asks how much controller authorization adds to a fixed response path, how that path behaves when the controller becomes unreachable, and how detector misses and source-wide blocking affect useful service. We distinguish those questions from whether federated training or a particular neural architecture improves classification. The experiments report unsuccessful detections, failed captures and service costs alongside successful response times.
 
+1 1 Related work
+
+Federated training, edge inference and local response address different parts of an IDS. FedAvg [1] supplies a training recipe and Edge-IIoTset [2] supplies a public reference corpus. IDS-MA [3] evaluates centralized and federated MQTT classifiers. Pope et al. [5] examine federated anomaly detection using system calls at the edge. Neither comparison makes their classification scores directly interchangeable with our packet-window task.
+
+Prior work also addresses timeliness and mitigation directly. Dash and Acken [4] distinguish IDS latency from post-detection latency, while Puccetti and Ceccarelli [7] relate detector latency to false alarms and coverage. Ma and Su [6] combine federated detection with cooperative SDN mitigation. Thus the present study does not claim to introduce edge IDS, latency decomposition or federated mitigation. Its focus is the paired authorization comparison together with capture validity, missed responses and publisher service costs.
+
+Table 1 is a focused comparison of relevant studies, not a systematic review or a ranking of scores from incompatible datasets. For [6], only the publisher abstract, highlights and section previews were accessible; exact numeric comparisons are therefore omitted. Limitations in the last column describe relevance to our question, not exhaustive weaknesses.
+
+Table 1. Related work and relevance to detection and response measurement.
+
 2 Methods
 
 2 1 Evaluation structure
 
-The three experiments address different questions and use different inputs. Their classification scores and latency boundaries are not interchangeable. Table 1 defines the evidence supplied by each experiment. All training and inference run on one laptop or its Docker Desktop Linux virtual machine; federated clients are simulated rather than separate physical gateways.
+The three experiments address different questions and use different inputs. Their classification scores and latency boundaries are not interchangeable. Table 2 defines the evidence supplied by each experiment. All training and inference run on one laptop or its Docker Desktop Linux virtual machine; federated clients are simulated rather than separate physical gateways.
 
-Table 1. Experiments and measurement boundaries.
+Table 2. Experiments and measurement boundaries.
 
 2 2 Public data and sensitivity audit
 
@@ -62,9 +72,9 @@ One observation is an active source in a non-overlapping 250 ms window. Empty wi
 
 AF_PACKET capture records kernel SO_TIMESTAMPNS timestamps and nanosecond PCAP. Offline replay recomputes the features from raw packets. TCP streams are reassembled by flow and raw sequence position. PUBLISH message IDs and their independently designated benign/attack tags are reconciled to TCP byte ranges. A source window is attack-positive only when it contains bytes from a designated malicious PUBLISH. If those bytes span windows, each corresponding window is positive. ACK-only windows are not labelled attacks merely because an attack occurs elsewhere in the episode. Instrumentation tags have equal length and are never classifier inputs.
 
-Three commissioning episodes precede data collection. The dataset contains 36 training, 12 validation and 12 test episodes with disjoint traffic seeds and no mitigation during collection. Whole episodes define the split, and repeated or ambiguous feature windows are retained. All 60 dataset episodes pass the strict capture/feature-replay and TCP/MQTT reconstruction checks. Table 2 reports the resulting observation counts.
+Three commissioning episodes precede data collection. The dataset contains 36 training, 12 validation and 12 test episodes with disjoint traffic seeds and no mitigation during collection. Whole episodes define the split, and repeated or ambiguous feature windows are retained. All 60 dataset episodes pass the strict capture/feature-replay and TCP/MQTT reconstruction checks. Table 3 reports the resulting observation counts.
 
-Table 2. Whole-episode splits for the separately trained MQTT detector.
+Table 3. Whole-episode splits for the separately trained MQTT detector.
 
 2 7 System conditions and decision policy
 
@@ -78,7 +88,7 @@ Delay is applied to both control-path egresses and actual RPC round trips are ca
 
 For the traffic-linked experiment, t0 is the converted monotonic kernel ingress timestamp of the first reconciled malicious PUBLISH bytes. The primary endpoint tc is successful return of the firewall command. A correct response additionally requires that the actual triggering source window is attack-positive. A command triggered by a benign window is not reclassified as a correct detection merely because an attack is active. The endpoint is an observed upper bound on rule installation, not a directly instrumented kernel commit or first-drop timestamp.
 
-Table 3. Decomposition of traffic-linked arrival-to-command time.
+Table 4. Decomposition of traffic-linked arrival-to-command time.
 
 The components sum to tc − t0 for each response. Their separate medians need not sum to the median total. RPC and firewall installation are not separated further because this journal does not timestamp their individual boundaries. Containers share the kernel boot ID and equal monotonic namespace offsets; timestamp conversion uncertainty is recorded. The maximum recorded conversion uncertainty is 10.41 µs.
 
@@ -94,7 +104,7 @@ The host is an AMD Ryzen 5 4600H laptop with 24 GB RAM and a GTX 1650 Ti with 4 
 
 3 1 Public benchmark and exclusion sensitivity
 
-Table 4. Filtered public-data test results as mean ± sample SD over three training seeds.
+Table 5. Filtered public-data test results as mean ± sample SD over three training seeds.
 
 The centralized MLP has the highest mean F1 in this filtered benchmark. The small difference between centralized and federated GRU recipes applies to one fixed random-record split after substantial input selection. It does not establish equivalence on new devices, independent captures or the live MQTT workload.
 
@@ -108,9 +118,9 @@ The selected 200 feature observations contain 100 attack and 100 benign records.
 
 3 3 Held out MQTT detector quality
 
-Table 5. MQTT test quality on 12 whole held-out episodes. F1 uncertainty here is seed SD.
+Table 6. MQTT test quality on 12 whole held-out episodes. F1 uncertainty here is seed SD.
 
-Centralized MLP and FedMLP IID obtain similar mean F1, 0.9786 and 0.9785. Packet rate alone obtains F1 0.9485, and the centralized GRU mean is 0.9497. Thus the workload does not establish a GRU advantage or a need for a complex recurrent classifier. Non-IID FedMLP is much more sensitive to partition than to initialization within the better-performing partitions: mean F1 changes from 0.8072 for partition 42 to 0.0144 for partition 43 and 0.8224 for partition 44. All failed recipes remain in Table 5.
+Centralized MLP and FedMLP IID obtain similar mean F1, 0.9786 and 0.9785. Packet rate alone obtains F1 0.9485, and the centralized GRU mean is 0.9497. Thus the workload does not establish a GRU advantage or a need for a complex recurrent classifier. Non-IID FedMLP is much more sensitive to partition than to initialization within the better-performing partitions: mean F1 changes from 0.8072 for partition 42 to 0.0144 for partition 43 and 0.8224 for partition 44. All failed recipes remain in Table 6.
 
 Partition 43 assigns 1,451 of 2,598 training windows to an entirely benign client; another 382-window client contains about 0.5% attack windows. The imbalance is compatible with client drift and an unfavorable threshold operating point under this full-local-pass recipe, but the experiment does not isolate one causal mechanism or establish that FedAvg always fails under non-IID data. The FedGRU non-IID mean F1 is 0.8804, with mean test FPR 0.0197 despite the validation-only FPR constraint.
 
@@ -118,13 +128,13 @@ The preselected deployed model has attack F1 0.7966, precision 0.9495, recall 0.
 
 3 4 Traffic linked response and coverage
 
-All 60 assigned condition episodes complete. Fifty-eight have valid capture and label reconstruction. Table 6 reports valid episodes, correct responses and conditional ingress-to-command medians separately. Observation-only mode deliberately installs no rule and is not counted as a detection-response failure. Its subscriber delivery is included in the service comparison.
+All 60 assigned condition episodes complete. Fifty-eight have valid capture and label reconstruction. Table 7 reports valid episodes, correct responses and conditional ingress-to-command medians separately. Observation-only mode deliberately installs no rule and is not counted as a detection-response failure. Its subscriber delivery is included in the service comparison.
 
-Table 6. Regular conditions. Latency is conditional on a valid attack-window-triggered response.
+Table 7. Regular conditions. Latency is conditional on a valid attack-window-triggered response.
 
 The low-rate workload produces a response in only one of three assigned episodes per mode and delay. A short latency among detected episodes must therefore be interpreted together with coverage. Higher-rate attacks usually trigger earlier within the first attack-positive window, whereas weak evidence can require a later window or produce no response at all.
 
-Table 7. Paired controller minus local arrival-to-command differences.
+Table 8. Paired controller minus local arrival-to-command differences.
 
 At 50 ms one-way delay, the median paired difference is 99.27 ms among six workloads with two valid responses; at zero added delay, it is 0.26 ms among seven such workloads. One additional pair at 50 ms lacks two valid reconstructions, and low-rate misses further reduce the paired latency sample. These are conditional paired results, not a guarantee that local mode always responds earlier in every realization. Actual TCP packetization, capture timing and the triggering window can vary across matched offered workloads.
 
@@ -132,13 +142,13 @@ The directly timestamped response components confirm that the controller path do
 
 3 5 Service delivery outage and capture reliability
 
-Table 8. Subscriber service at 50 ms one-way delay. Means over three assigned episodes per cell.
+Table 9. Subscriber service at 50 ms one-way delay. Means over three assigned episodes per cell.
 
 Mitigation reduces delivered attacking messages at medium and high offered loads, while differences at low load are small. All observation-only episodes deliver every scheduled benign message, so the experiment does not demonstrate an availability gain. Both other publishers retain 100% benign delivery in all 60 episodes. Lost legitimate messages belong to the publisher that is also the blocked attack source. This is collateral cost of source-wide filtering and TCP disruption, not evidence that every lost benign message was caused by a false-positive triggering window.
 
 After attack end plus nominal TTL, the worst scheduled-benign delivery ratio is 0.5086. Later decisions, retransmissions and TCP state can delay recovery beyond a single TTL interval. Historical firewall counters record 2,579 DROP packets across all conditions. Packet drops and delivered PUBLISH counts are different units, and neither alone establishes exact first-drop latency. Within the 58 valid reconstructed episodes, no block command is triggered by a benign window. The two invalid episodes cannot establish absence of false blocks.
 
-Table 9. Real controller-path outage with otherwise intact data and management paths.
+Table 10. Real controller-path outage with otherwise intact data and management paths.
 
 Local mode responds in three of three outage workloads and controller mode in none. Controller mode records 16 authorization failures and leaves 42, 43 and 44 windows unprocessed at the respective episode stops. Its fail-open policy preserves delivery but also allows the attack workload through. Local mode restricts attack delivery while retaining the same source-blocking service trade-off. An asynchronous controller client, fallback policy or different timeout could change this behavior; those alternatives are not evaluated.
 
@@ -166,11 +176,35 @@ Federated clients execute sequentially in simulation with pooled preprocessing m
 
 Local authorization shortens successful edge response by the controller-path overhead and retains the ability to block during the tested controller outage. A complete evaluation must also account for window formation, detector misses, capture reliability and the service cost of enforcement. In this MQTT workload, the non-IID detector misses some weak attacks, client partition can severely degrade classification, and source blocking reduces attack delivery at a cost to that source’s legitimate messages. These bounded findings support response-latency evaluation of a federated edge architecture while leaving broad detection superiority, production reliability and privacy guarantees unestablished.
 
+Appendix A Controller delay extension 2b
+
+Experiment 2b is an implemented protocol extension awaiting network execution. It contributes no new measured result to the abstract, Results or Conclusion. It reuses the three frozen non-IID GRU models, their thresholds and the same 200 observations from the completed feature-ready experiment. The base grid is 0, 10, 50, 100 and 250 ms one-way delay (6,000 trials); optional 500 ms gives 7,200 trials. A separate calibration connection has a ten-second total deadline. The trial authorization deadline is one second across reconnect, transmission and the complete reply; failure is fail-open without fallback.
+
+The report separates detector misses, block decisions prevented by timeouts, other controller errors and verified enforcement. Failed or missing responses stay in the assigned denominator and receive no successful latency. The 500 ms condition stresses the configured deadline and connection recovery, rather than identifying a universal failure point for city networks. Added time is fitted to measured RTT descriptively; shared block calibrations do not justify ordinary independent-sample standard errors.
+
+A separate rate profile uses one frozen model, 200 observations, delays 0 and 50 ms and UDP probe rates 200, 800 and 2,500 packets/s, giving 2,400 trials. It isolates probe load while holding classifier inputs fixed. Counter read intervals and boundary uncertainty are recorded explicitly. Passed packets in that interval are not exact attack-onset-to-rule counts, and UDP packets must not be equated with MQTT messages. This profile remains unexecuted.
+
+For a constant realized message rate lambda and an otherwise identical successful response, an explanatory approximation is delta N = lambda times delta T. Table A1 uses an illustrative extra delay of 100 ms; it is a calculation, not an experiment 2b result. Missed detections, TCP backpressure, finite attacks, retransmissions and recovery can invalidate the approximation. Message volume is an exposure measure; useful-service harm also requires delivery and recovery metrics.
+
+Table A1. Calculated extra messages for an illustrative 100 ms response delay.
+
+The completed MQTT experiment already varies offered rate and retains subscriber counts before command completion, total attack delivery and legitimate delivery. Those observations remain the primary service evidence. Larger netem delays are sensitivity conditions; mapping them to LTE-M or NB-IoT requires primary measurements of the actual edge-to-controller path.
+
 References
 
 [1] H. B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. Agüera y Arcas. Communication-Efficient Learning of Deep Networks from Decentralized Data. Proceedings of the 20th International Conference on Artificial Intelligence and Statistics, PMLR 54, pp. 1273–1282, 2017. https://proceedings.mlr.press/v54/mcmahan17a.html
 
 [2] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke. Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning. IEEE Access, vol. 10, pp. 40281–40306, 2022. https://doi.org/10.1109/ACCESS.2022.3165809
+
+[3] A. Omotosho, Y. Qendah, and C. Hammer. IDS-MA: Intrusion Detection System for IoT MQTT Attacks Using Centralized and Federated Learning. Author manuscript. https://knowledge.lancashire.ac.uk/id/eprint/48404/1/2023118673.pdf
+
+[4] S. Dash and J. M. Acken. Intrusion detection latency: the neglected metric. Cybersecurity, vol. 9, article 144, 2026. https://doi.org/10.1186/s42400-026-00574-7
+
+[5] J. Pope et al. Intrusion Detection at the IoT Edge Using Federated Learning. Security and Privacy in Smart Environments, LNCS 14800, pp. 98–119, 2024. https://doi.org/10.1007/978-3-031-66708-4_5
+
+[6] J. Ma and W. Su. Collaborative DDoS defense for SDN-based AIoT with autoencoder-enhanced federated learning. Information Fusion, vol. 117, article 102820, 2025. https://doi.org/10.1016/j.inffus.2024.102820
+
+[7] T. Puccetti and A. Ceccarelli. Detection Latencies of Anomaly Detectors: An Overlooked Perspective? ISSRE, pp. 37–48, 2024. https://doi.org/10.1109/ISSRE62328.2024.00015
 
 Data and reproducibility
 

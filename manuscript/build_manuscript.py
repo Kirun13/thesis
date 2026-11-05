@@ -7,6 +7,7 @@ import statistics
 from pathlib import Path
 
 from docx import Document
+from docx.enum.section import WD_SECTION, WD_ORIENT
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
@@ -15,12 +16,13 @@ from docx.shared import Cm, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'manuscript'
-DOCX = OUT / 'Federated_Edge_IDS_Manuscript_v1.docx'
+DOCX = OUT / 'Federated_Edge_IDS_Manuscript_v2.docx'
 SOURCE = ROOT / 'runs/online/final-v1/summary.json'
 study = json.loads(SOURCE.read_text())
 detectors = study['detector_results']
 episodes = study['system_episodes']
 cells = study['system_cells']
+literature = json.loads((OUT / 'sources/literature_review.json').read_text(encoding='utf-8'))
 legacy = list(csv.DictReader((ROOT / 'runs/overnight-2026-11-04T14-57-07-088Z/summary.csv').open()))
 
 doc = Document()
@@ -178,13 +180,40 @@ p('The study asks how much controller authorization adds to a fixed response pat
   'improves classification. The experiments report unsuccessful detections, failed captures and service costs '
   'alongside successful response times.')
 
+h('1 1 Related work', 2)
+p('Federated training, edge inference and local response address different parts of an IDS. '
+  'FedAvg [1] supplies a training recipe and Edge-IIoTset [2] supplies a public reference corpus. '
+  'IDS-MA [3] evaluates centralized and federated MQTT classifiers. Pope et al. [5] examine '
+  'federated anomaly detection using system calls at the edge. Neither comparison makes '
+  'their classification scores directly interchangeable with our packet-window task.')
+p('Prior work also addresses timeliness and mitigation directly. Dash and Acken [4] distinguish '
+  'IDS latency from post-detection latency, while Puccetti and Ceccarelli [7] relate detector '
+  'latency to false alarms and coverage. Ma and Su [6] combine federated detection with '
+  'cooperative SDN mitigation. Thus the present study does not claim to introduce edge IDS, '
+  'latency decomposition or federated mitigation. Its focus is the paired authorization '
+  'comparison together with capture validity, missed responses and publisher service costs.')
+p('Table 1 is a focused comparison of relevant studies, not a systematic review or a ranking '
+  'of scores from incompatible datasets. For [6], only the publisher abstract, highlights and '
+  'section previews were accessible; exact numeric comparisons are therefore omitted. '
+  'Limitations in the last column describe relevance to our question, not exhaustive weaknesses.')
+wide = doc.add_section(WD_SECTION.NEW_PAGE)
+wide.orientation = WD_ORIENT.LANDSCAPE
+wide.page_width, wide.page_height = Cm(29.7), Cm(21)
+wide.left_margin, wide.right_margin = Cm(1.5), Cm(1.5)
+table('Table 1. Related work and relevance to detection and response measurement.',
+      literature['headers'], literature['rows'], [2.8, 3.0, 3.1, 4.4, 4.1, 4.2, 5.1])
+portrait = doc.add_section(WD_SECTION.NEW_PAGE)
+portrait.orientation = WD_ORIENT.PORTRAIT
+portrait.page_width, portrait.page_height = Cm(21), Cm(29.7)
+portrait.left_margin, portrait.right_margin = Cm(2), Cm(2)
+
 h('2 Methods')
 h('2 1 Evaluation structure', 2)
 p('The three experiments address different questions and use different inputs. Their classification scores '
-  'and latency boundaries are not interchangeable. Table 1 defines the evidence supplied by each experiment. '
+  'and latency boundaries are not interchangeable. Table 2 defines the evidence supplied by each experiment. '
   'All training and inference run on one laptop or its Docker Desktop Linux virtual machine; federated '
   'clients are simulated rather than separate physical gateways.')
-table('Table 1. Experiments and measurement boundaries.',
+table('Table 2. Experiments and measurement boundaries.',
       ['Experiment', 'Data and scale', 'Primary outcome'],
       [('Public-data benchmark', '12 jobs; filtered Edge-IIoTset records', 'Detection quality on one fixed record split'),
        ('Feature-ready comparison', '3,600 trials; 1,800 matched pairs', 'Prepared feature to command completion'),
@@ -295,10 +324,10 @@ p('AF_PACKET capture records kernel SO_TIMESTAMPNS timestamps and nanosecond PCA
 p('Three commissioning episodes precede data collection. The dataset contains 36 training, 12 validation '
   'and 12 test episodes with disjoint traffic seeds and no mitigation during collection. Whole episodes '
   'define the split, and repeated or ambiguous feature windows are retained. All 60 dataset episodes '
-  'pass the strict capture/feature-replay and TCP/MQTT reconstruction checks. Table 2 reports the resulting '
+  'pass the strict capture/feature-replay and TCP/MQTT reconstruction checks. Table 3 reports the resulting '
   'observation counts.')
 audit = json.loads((ROOT / 'data/online/dataset-audit.json').read_text())
-table('Table 2. Whole-episode splits for the separately trained MQTT detector.',
+table('Table 3. Whole-episode splits for the separately trained MQTT detector.',
       ['Split', 'Episodes', 'Active source windows', 'Attack-positive windows'],
       [(name, len(audit['splits'][key]['episodes']), audit['splits'][key]['windows'], audit['splits'][key]['positive'])
        for name, key in [('Training', 'train'), ('Validation', 'val'), ('Test', 'test')]], [3.3, 2.7, 5.5, 5.5])
@@ -331,7 +360,7 @@ p('For the traffic-linked experiment, t0 is the converted monotonic kernel ingre
   'A command triggered by a benign window is not reclassified as a correct detection merely because an '
   'attack is active. The endpoint is an observed upper bound on rule installation, not a directly '
   'instrumented kernel commit or first-drop timestamp.')
-table('Table 3. Decomposition of traffic-linked arrival-to-command time.',
+table('Table 4. Decomposition of traffic-linked arrival-to-command time.',
       ['Component', 'Definition'],
       [('First attack window readiness', 't1 − t0; t1 is readiness of the first attack-positive source window'),
        ('Waiting for a later trigger', 't2 − t1; t2 is readiness of the actual triggering window'),
@@ -367,7 +396,7 @@ p('The host is an AMD Ryzen 5 4600H laptop with 24 GB RAM and a GTX 1650 Ti with
 h('3 Results')
 doc.paragraphs[-1].paragraph_format.page_break_before = True
 h('3 1 Public benchmark and exclusion sensitivity', 2)
-table('Table 4. Filtered public-data test results as mean ± sample SD over three training seeds.',
+table('Table 5. Filtered public-data test results as mean ± sample SD over three training seeds.',
       ['Training recipe', 'Attack F1', 'Recall', 'FPR'],
       [(r['method'], f"{float(r['f1_mean']):.4f} ± {float(r['f1_sd']):.4f}",
         f"{float(r['recall_mean']):.4f}", f"{float(r['fpr_mean']):.4f}") for r in legacy], [6.2, 4.8, 3.0, 3.0])
@@ -409,14 +438,14 @@ for method, part in order:
     f1text = f'{statistics.mean(f1):.4f}' + (f' ± {statistics.stdev(f1):.4f}' if len(f1) > 1 else '')
     quality_rows.append((names[method], str(part) if part is not None else '—', len(entries),
                          f1text, f'{mean(entries, "recall"):.4f}', f'{mean(entries, "fpr"):.4f}'))
-table('Table 5. MQTT test quality on 12 whole held-out episodes. F1 uncertainty here is seed SD.',
+table('Table 6. MQTT test quality on 12 whole held-out episodes. F1 uncertainty here is seed SD.',
       ['Recipe', 'Partition seed', 'Runs', 'Attack F1', 'Recall', 'FPR'], quality_rows,
       [5.0, 2.0, 1.2, 4.0, 2.4, 2.4])
 p('Centralized MLP and FedMLP IID obtain similar mean F1, 0.9786 and 0.9785. Packet rate alone obtains '
   'F1 0.9485, and the centralized GRU mean is 0.9497. Thus the workload does not establish a GRU advantage '
   'or a need for a complex recurrent classifier. Non-IID FedMLP is much more sensitive to partition than '
   'to initialization within the better-performing partitions: mean F1 changes from 0.8072 for partition 42 '
-  'to 0.0144 for partition 43 and 0.8224 for partition 44. All failed recipes remain in Table 5.')
+  'to 0.0144 for partition 43 and 0.8224 for partition 44. All failed recipes remain in Table 6.')
 p('Partition 43 assigns 1,451 of 2,598 training windows to an entirely benign client; another 382-window '
   'client contains about 0.5% attack windows. The imbalance is compatible with client drift and an '
   'unfavorable threshold operating point under this full-local-pass recipe, but the experiment does not '
@@ -429,7 +458,7 @@ p('The preselected deployed model has attack F1 0.7966, precision 0.9495, recall
 
 h('3 4 Traffic linked response and coverage', 2)
 p('All 60 assigned condition episodes complete. Fifty-eight have valid capture and label reconstruction. '
-  'Table 6 reports valid episodes, correct responses and conditional ingress-to-command medians separately. '
+  'Table 7 reports valid episodes, correct responses and conditional ingress-to-command medians separately. '
   'Observation-only mode deliberately installs no rule and is not counted as a detection-response failure. '
   'Its subscriber delivery is included in the service comparison.')
 response_rows = []
@@ -439,7 +468,7 @@ for c in sorted((c for c in cells if not c['outage'] and c['mode'] != 'none'),
                           'Controller' if c['mode'] == 'central' else 'Local',
                           f'{c["valid_episodes"]}/{c["episodes"]}', f'{c["responded_episodes"]}/{c["episodes"]}',
                           f'{c["arrival_to_command_median_ms"]:.2f}' if c['arrival_to_command_median_ms'] is not None else 'N/A'))
-table('Table 6. Regular conditions. Latency is conditional on a valid attack-window-triggered response.',
+table('Table 7. Regular conditions. Latency is conditional on a valid attack-window-triggered response.',
       ['Load', 'One-way delay ms', 'Mode', 'Valid / assigned', 'Responses / assigned', 'Median ms'],
       response_rows, [2.1, 2.5, 3.1, 3.0, 3.4, 2.9])
 p('The low-rate workload produces a response in only one of three assigned episodes per mode and delay. '
@@ -452,7 +481,7 @@ for delay in [0, 50]:
     differences = [r['central_minus_local_response_ms'] for r in pairs if r['central_minus_local_response_ms'] is not None]
     pair_rows.append((delay, len(pairs), sum(r['both_valid'] for r in pairs), len(differences),
                       f'{statistics.median(differences):.2f}'))
-table('Table 7. Paired controller minus local arrival-to-command differences.',
+table('Table 8. Paired controller minus local arrival-to-command differences.',
       ['One-way delay ms', 'Assigned workload pairs', 'Both valid', 'Both respond', 'Median difference ms'],
       pair_rows, [3.0, 4.0, 3.1, 3.1, 3.8])
 p('At 50 ms one-way delay, the median paired difference is 99.27 ms among six workloads with two valid '
@@ -475,7 +504,7 @@ for c in sorted((c for c in cells if c['delay_ms'] == 50 and not c['outage']),
     service_rows.append((['Low', 'Medium', 'High'][c['rate_level']],
                          {'none': 'No mitigation', 'local': 'Local', 'central': 'Controller'}[c['mode']],
                          f'{100*c["benign_delivery_mean"]:.2f}', f'{c["attack_messages_mean"]:.1f}'))
-table('Table 8. Subscriber service at 50 ms one-way delay. Means over three assigned episodes per cell.',
+table('Table 9. Subscriber service at 50 ms one-way delay. Means over three assigned episodes per cell.',
       ['Load', 'Mode', 'Scheduled benign delivered percent', 'Attack messages delivered'],
       service_rows, [2.6, 4.1, 5.2, 5.1])
 p('Mitigation reduces delivered attacking messages at medium and high offered loads, while differences '
@@ -495,7 +524,7 @@ for c in sorted((c for c in cells if c['outage']), key=lambda c: c['mode']):
     outage_rows.append(('Controller' if c['mode'] == 'central' else 'Local',
                         f'{c["responded_episodes"]}/{c["episodes"]}', c['response_failures'],
                         f'{100*c["benign_delivery_mean"]:.2f}', f'{c["attack_messages_mean"]:.1f}'))
-table('Table 9. Real controller-path outage with otherwise intact data and management paths.',
+table('Table 10. Real controller-path outage with otherwise intact data and management paths.',
       ['Mode', 'Responses / assigned', 'Authorization failures', 'Benign delivered percent', 'Attack messages delivered'],
       outage_rows, [3.0, 3.5, 3.5, 3.5, 3.5])
 p('Local mode responds in three of three outage workloads and controller mode in none. Controller mode '
@@ -563,6 +592,38 @@ p('Local authorization shortens successful edge response by the controller-path 
   'messages. These bounded findings support response-latency evaluation of a federated edge architecture '
   'while leaving broad detection superiority, production reliability and privacy guarantees unestablished.')
 
+h('Appendix A Controller delay extension 2b')
+p('Experiment 2b is an implemented protocol extension awaiting network execution. It contributes '
+  'no new measured result to the abstract, Results or Conclusion. It reuses the three frozen '
+  'non-IID GRU models, their thresholds and the same 200 observations from the completed '
+  'feature-ready experiment. The base grid is 0, 10, 50, 100 and 250 ms one-way delay '
+  '(6,000 trials); optional 500 ms gives 7,200 trials. A separate calibration connection '
+  'has a ten-second total deadline. The trial authorization deadline is one second across '
+  'reconnect, transmission and the complete reply; failure is fail-open without fallback.')
+p('The report separates detector misses, block decisions prevented by timeouts, other controller '
+  'errors and verified enforcement. Failed or missing responses stay in the assigned denominator '
+  'and receive no successful latency. The 500 ms condition stresses the configured deadline '
+  'and connection recovery, rather than identifying a universal failure point for city networks. '
+  'Added time is fitted to measured RTT descriptively; shared block calibrations do not justify '
+  'ordinary independent-sample standard errors.')
+p('A separate rate profile uses one frozen model, 200 observations, delays 0 and 50 ms and '
+  'UDP probe rates 200, 800 and 2,500 packets/s, giving 2,400 trials. It isolates probe load '
+  'while holding classifier inputs fixed. Counter read intervals and boundary uncertainty '
+  'are recorded explicitly. Passed packets in that interval are not exact attack-onset-to-rule '
+  'counts, and UDP packets must not be equated with MQTT messages. This profile remains unexecuted.')
+p('For a constant realized message rate lambda and an otherwise identical successful response, '
+  'an explanatory approximation is delta N = lambda times delta T. Table A1 uses an illustrative '
+  'extra delay of 100 ms; it is a calculation, not an experiment 2b result. Missed detections, '
+  'TCP backpressure, finite attacks, retransmissions and recovery can invalidate the approximation. '
+  'Message volume is an exposure measure; useful-service harm also requires delivery and recovery metrics.')
+table('Table A1. Calculated extra messages for an illustrative 100 ms response delay.',
+      ['Constant realized rate messages per second', 'Extra delay seconds', 'Calculated extra messages'],
+      [('200', '0.100', '20'), ('800', '0.100', '80'), ('2,500', '0.100', '250')], [7, 5, 5])
+p('The completed MQTT experiment already varies offered rate and retains subscriber counts '
+  'before command completion, total attack delivery and legitimate delivery. Those observations '
+  'remain the primary service evidence. Larger netem delays are sensitivity conditions; mapping '
+  'them to LTE-M or NB-IoT requires primary measurements of the actual edge-to-controller path.')
+
 h('References')
 p('[1] H. B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. Agüera y Arcas. Communication-Efficient '
   'Learning of Deep Networks from Decentralized Data. Proceedings of the 20th International Conference '
@@ -571,6 +632,9 @@ p('[1] H. B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. Agüera y Arcas. C
 p('[2] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke. Edge-IIoTset: A New Comprehensive '
   'Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning. '
   'IEEE Access, vol. 10, pp. 40281–40306, 2022. https://doi.org/10.1109/ACCESS.2022.3165809')
+
+for item in literature['references']:
+    p(f"[{item['id']}] {item['reference']} {item['url']}")
 
 h('Data and reproducibility')
 p('The author release of Edge-IIoTset [2], fixed protocols, source snapshots, checkpoints, raw PCAP, '
@@ -587,8 +651,8 @@ text = '\n\n'.join(para.text for para in doc.paragraphs if para.text)
 provenance = {
     'document': str(DOCX.relative_to(ROOT)),
     'language': 'English',
-    'scope': 'Evidence-aligned local manuscript with Methods Results Discussion; literature review requires expansion.',
-    'evidence': [str(SOURCE.relative_to(ROOT)), 'ONLINE_PROTOCOL.md', 'PROTOCOL.md', 'RESPONSE_PROTOCOL.md',
+    'scope': 'Evidence-aligned local manuscript with Methods Results Discussion, a verified focused literature matrix and an explicitly unexecuted experiment 2b appendix.',
+    'evidence': [str(SOURCE.relative_to(ROOT)), 'ONLINE_PROTOCOL.md', 'PROTOCOL.md', 'RESPONSE_PROTOCOL.md', 'response_2b/PROTOCOL_2B.md', 'manuscript/sources/literature_review.json',
                  'runs/response/full-20261104T153359Z/RESULTS.md',
                  'runs/overnight-2026-11-04T14-57-07-088Z/summary.csv',
                  'runs/extension-audit/excluded-cohort-sensitivity.json', 'data/processed/audit.json',
@@ -596,6 +660,8 @@ provenance = {
     'source_document': 'https://docs.google.com/document/d/1la7B88pgKXWi5_aZNUsmOoPmb0W4u3pBFf1aco5NBnI/edit',
     'verified_external_references': ['https://proceedings.mlr.press/v54/mcmahan17a.html',
                                      'https://doi.org/10.1109/ACCESS.2022.3165809'],
+    'literature_sources': literature['references'],
+    'experiment_2b_status': 'Implemented and unit tested; network runs not performed',
     'tables': len(doc.tables),
     'main_text_word_count': len(text.split()),
     'docx_sha256': hashlib.sha256(DOCX.read_bytes()).hexdigest(),
