@@ -64,6 +64,7 @@ def main():
     (target / 'excluded-cohort-sensitivity.json').write_text(json.dumps(report, indent=2))
     lines = ['# Frozen-model sensitivity to the excluded ambiguous cohort', '',
              f'Evaluate all {int(weights.sum()):,} previously excluded records with unchanged legacy models and validation thresholds. '
+             f'These rows contain only {len(weights)} distinct ambiguous input vectors; they are not independent observations. '
              'Identical input groups are evaluated once and confusion counts weighted by their original label frequencies.', '',
              '| Model | Seed | Accuracy | Attack F1 | Recall | FPR |', '|---|---:|---:|---:|---:|---:|']
     for row in rows:

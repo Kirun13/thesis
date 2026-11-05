@@ -1,0 +1,249 @@
+Federated Edge-Based Intrusion Detection and Local Mitigation for Smart City IoT Systems: A Detection-to-Response Latency Evaluation
+
+
+Federated Edge-Based Intrusion Detection - is about our system, which takes GRU attention model, trained by Federated Avg on several edge nodes
+
+
+ Local Mitigation - after the model detects the attack, the action is taken on the same node. In most papers, action is taken by a centralized SDN controller.
+ 
+Detection-to-Response Latency Evaluation - we measure the full time from the arrival of a flow to the moment the action is finished
+
+
+There are 23 papers, which we categorized into 6 groups:
+* Federated intrusion detection
+* Edge-deployed intrusion detection
+* GRU and attention models
+* Automated and local mitigation
+* Smart city IoT security
+* Other sources
+
+
+ 1. Federated intrusion detection
+[1] NIDS-FGPA: A federated learning network intrusion detection algorithm based on secure aggregation of gradient similarity models. PLOS ONE, 2024.
+[2] Dataset-centric evaluation of federated intrusion detection models in IoT networks. Scientific Reports, 2026.
+[3] Enhancing Privacy in IoT-Enabled Digital Infrastructure: Evaluating Federated Learning for Intrusion and Fraud Detection, 2025.
+[4] J. Pope et al. Intrusion Detection at the IoT Edge Using Federated Learning. LNCS vol. 14800, Springer, 2024, pp. 98-119.
+[5] A. P. Chowdhury et al. FLEX-IDS: A secure and explainable federated intrusion detection framework for Edge-of-Things environments under adversarial conditions. Computers and Electrical Engineering, vol. 129, art. 110827, 2026.
+
+
+2. Edge-deployed intrusion detection
+[6] K. Nasir et al. HED-ID: a federated expert system for interpretable and resource-adaptive intrusion detection on edge devices. Scientific Reports, vol. 16, art. 28717, 2026.
+[7] Edge AI Bridge: A Micro-Layer Intrusion Detection Architecture for Smart-City IoT Networks. IoT (MDPI), vol. 7, no. 2, art. 33, 2026.
+[8] A Lightweight Two-Stage Intrusion Detection Framework Optimized for Edge-Based IoT Environments. Computers, Materials & Continua, 2026.
+[9] Dual-Optimized Genetic Algorithm for Edge-Ready IoT Intrusion Detection on Raspberry Pi. J (MDPI), vol. 9, no. 1, art. 3, 2026.
+[10] Securing IoT Using Lightweight TCN for Edge Deployment on Raspberry Pi 4. IEEE Open Journal of the Communications Society, 2025.
+[11] Trustworthy Adaptive AI for Real-Time Intrusion Detection in Industrial IoT Security. IoT (MDPI), vol. 6, no. 3, art. 53, 2025.
+[12] Lightweight and Energy-Aware Intrusion Detection for Industrial IoT Using TinyML and Edge AI, 2026.
+3. GRU and attention models
+[13] Enhancing IoT Network Security: A BPSO-Optimized Attention-GRU Deep Learning Framework for Intrusion Detection. Computers (MDPI), vol. 15, no. 5, art. 266, 2026.
+[14] An improved intrusion detection method for IIoT using attention mechanisms, BiGRU, and Inception-CNN. Scientific Reports, vol. 14, 2024.
+[15] Deep Learning Based Intrusion Detection System of IoT Technology: Accuracy Versus Computational Complexity. International Journal of Safety and Security Engineering, vol. 14, no. 5, 2024.
+
+
+4 Automated and local mitigation
+[16] Collaborative DDoS defense for SDN-based AIoT with autoencoder-enhanced federated learning. Information Fusion, vol. 117, art. 102820, 2025.
+[17] Design of an AI-driven secure 5G-SDN framework with federated reinforcement learning for anomaly detection, mitigation, and attack forensics. Frontiers in Artificial Intelligence, 2026.
+[18] A Comprehensive Review of DDoS Detection and Mitigation in SDN Environments: Machine Learning, Deep Learning, and Federated Learning Perspectives. Electronics (MDPI), vol. 14, no. 21, art. 4222, 2025.
+
+
+5. Smart city IoT security
+[19] Interpretable Federated Learning Model for Cyber Intrusion Detection in Smart Cities with Privacy-Preserving Feature Selection. Computers, Materials & Continua, vol. 85, no. 3, pp. 5183-5206, 2025.
+[20] I. Priyadarshini. Anomaly Detection of IoT Cyberattacks in Smart Cities Using Federated Learning and Split Learning. Big Data and Cognitive Computing, vol. 8, no. 3, 2024.
+
+
+6.Other sources used in the Introduction
+[21] M. A. Ferrag et al. Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning. IEEE Access, vol. 10, pp. 40281-40306, 2022.
+[22] B. McMahan et al. Communication-Efficient Learning of Deep Networks from Decentralized Data. Proc. AISTATS, PMLR vol. 54, 2017, pp. 1273-1282.
+[23] Detection Latencies of Anomaly Detectors: An Overlooked Perspective? arXiv:2402.09082, 2024.
+
+
+
+
+Paper
+	Dataset
+	Metrics
+	Key result
+	Mitigation / response
+	Main contribution
+	Limitation relevant to us
+	 1. Federated intrusion detection
+	[1] NIDS-FGPA, PLOS ONE, 2024
+	Edge-IIoTset; CIC-IoT2023
+	Accuracy, precision, recall, validation loss
+	Accuracy 0.945 on Edge-IIoTset and 0.992 on CIC-IoT2023. The paper also compares federated and centralized training on Edge-IIoTset: 92.49% against 93.92%.
+	None
+	A new way to combine client updates, based on how similar their gradients are
+	Only detection. No latency and no response step.
+	[2] Dataset-centric evaluation, Sci. Rep., 2026
+	Edge-IIoTset; CIC-IoT2023; TII-SSRC-23
+	Accuracy, F1, rounds to converge, communication cost
+	On Edge-IIoTset FedProx-LSTM reaches F1 94.0% and FedAvg-LSTM 93.0%. FedNova reaches about 95% accuracy in about 20 rounds, while FedAvg needs about 50, and it sends 15-25% less data.
+	None
+	A fair comparison of FedAvg, FedProx and FedNova on three IoT datasets
+	Offline test only. No edge device, no latency, no response.
+	[3] Privacy in IoT-Enabled Digital Infrastructure, 2025
+	ToN_IoT; CICIDS2017; UNSW-NB15
+	Accuracy over 50 rounds, speed of convergence
+	FedProx starts at 99.30% and reaches 99.90% after 50 rounds. On UNSW-NB15: FedAvg 98.63%, FedProx 97.91%, FedOpt 98.64%.
+	None
+	Shows that on easy splits the choice of aggregation rule changes very little
+	No edge device. Data split is favourable, so the test is not hard.
+	[4] Pope et al., LNCS 14800, 2024
+	Not reported
+	Not reported
+	Not reported in the abstract we could read. The paper shows that federated training can be done on IoT edge nodes.
+	None
+	Shows that federated IDS training at the IoT edge is practical
+	We need the full text to get numbers. No response step.
+	[5] FLEX-IDS, Comput. Electr. Eng., 2026
+	Not reported
+	Accuracy; robustness against attacks on the model
+	98.05% accuracy, as reported by an independent re-implementation in [6]. The original numbers need the full text.
+	None
+	Federated IDS for Edge-of-Things with explanations and adversarial robustness
+	Fixed settings, local explanations only, no response step.
+	2. Edge-deployed intrusion detection
+	[6] HED-ID, Sci. Rep., 2026 (closest to ours)
+	CICIDS-2017; UNSW-NB15; ToN-IoT; ToN-IoT-EdgeNoise
+	Precision, recall, F1; inference latency; memory; accuracy under CPU load
+	95.6% accuracy on a server and 93.8% on a Raspberry Pi 4. Inference takes 18-22 ms. Memory drops from 92-115 MB to 78-96 MB after pruning, and accuracy falls by at most 1.1%. On a Jetson Nano at 80% CPU load: 91.2% accuracy at 21 ms. Attention raises accuracy from 90.6% to 93.4%.
+	None. The pipeline stops at the decision.
+	Puts federated training, attention, edge deployment and latency in one system
+	No mitigation and no end-to-end response time. Does not use Edge-IIoTset. Industrial, not smart city.
+	[7] Edge AI Bridge, IoT (MDPI), 2026
+	Smart-city traffic built from CIC-IoT-2023
+	Detection latency; accuracy, precision, recall, F1, false positive rate
+	Detection latency is about 50 ms at the micro-edge, about 200 ms at a gateway and about 500 ms in the cloud.
+	None. Latency is measured only up to the alert.
+	Treats the place where detection runs as the main variable and measures it
+	No federated training. No response step.
+	[8] Lightweight Two-Stage IDS, CMC, 2026
+	Not reported
+	Latency per flow, throughput, CPU and memory
+	26.66 microseconds per flow on a Raspberry Pi 3, at 37,500 flows per second. The same model takes 5.46 microseconds on a normal PC.
+	None
+	Shows that detection on cheap hardware can take microseconds
+	Detection only. No federated training, no response.
+	[9] Dual-Optimized Genetic Algorithm, J (MDPI), 2026
+	Not reported
+	Accuracy, confusion matrix, inference time, CPU and memory
+	4.3 ms per sample on a Raspberry Pi 5. CPU use 29.29% on average, memory 20.80%.
+	None
+	Gives a clear resource profile of a tuned tree model on modern edge hardware
+	Detection only. No federated training, no response.
+	[10] Lightweight TCN, IEEE OJ-COMS, 2025
+	MQTT-based DDoS dataset
+	Accuracy; mean inference latency on the device
+	99.95% accuracy at 0.19 ms per inference on a Raspberry Pi 4, rising to 1.29 ms in some settings.
+	None
+	Shows that after quantization, inference time stops being the bottleneck
+	Only one attack family. Detection only.
+	[11] Trustworthy Adaptive AI, IoT (MDPI), 2025
+	Not reported
+	Accuracy; inference time on edge and on a workstation
+	34.8 ms on a Raspberry Pi 5 against 12.5 ms on a workstation, so still under the 50 ms real-time limit.
+	None
+	Measures the price of moving inference from a workstation to an edge device
+	Detection only. No federated training, no response.
+	[12] TinyML and Edge AI IDS, 2026
+	Edge-IIoTset; CICIoT2023; RT-IoT2022
+	Offline detection quality; latency per sample
+	Good offline results, but 120-180 ms per sample on a Raspberry Pi 4. The authors say this is too slow for strict real-time use.
+	None
+	A useful counter-example: running on the edge does not by itself make a system fast
+	Latency measured only in preliminary tests. No response step.
+	3. GRU and attention models
+	[13] BPSO-Optimized Attention-GRU, Computers (MDPI), 2026
+	BoT-IoT; CIC-IDS2017 and others
+	Accuracy, precision, recall, F1
+	Precision 99.46% and F1 98.94% on BoT-IoT, against 98.68% for LSTM-GRU and 97.50% for CNN-LSTM.
+	None
+	Confirms that attention on top of GRU beats plain recurrent models
+	No edge device, no latency, no federated training.
+	[14] NIDS-BAI, Sci. Rep., 2024
+	Edge-IIoTset; CIC-IDS2017; CIC-IoT2023
+	Accuracy, precision, recall, F1 (binary and multiclass)
+	On Edge-IIoTset: recall 0.947, precision 0.948, F1 0.946. Binary accuracy 98.97%, multiclass 98.41%. A plain GRU on the same data reaches F1 0.909.
+	None
+	A good reference point for attention-based detection on Edge-IIoTset
+	Centralized training only. No edge device, no latency.
+	[15] GRU with Self-Attention, IJSSE, 2024
+	ToN-IoT
+	Accuracy, precision, recall, F1; classification time; number of parameters
+	Accuracy: GRU 97%, LSTM 98.1%, Bi-LSTM 98.4%, GRU with self-attention 99%. The attention model classifies in 0.075-0.3 ms against 0.489-0.55 ms for plain GRU, and has fewer parameters.
+	None
+	Shows attention makes the model both more accurate and faster
+	Timing measured on a workstation, not on edge hardware.
+	4 Automated and local mitigation
+	[16] Collaborative DDoS defense for SDN-based AIoT, Inf. Fusion, 2025
+	Not reported
+	Detection quality, false alarms, recovery speed
+	Good detection, fast recovery; exact numbers need full text.
+	Yes; blocking across autonomous systems
+	Federated detection with working mitigation
+	Not on the detecting node; no timing
+	[17] Federated RL for 5G-SDN, Frontiers in AI, 2026
+	Not reported
+	Detection accuracy vs controllers
+	95.1% with 20 SDN controllers.
+	Yes; learned policies on controllers
+	Closest link of FL and automatic response
+	Central controller; no end-to-end time
+	[18] Review of DDoS in SDN, Electronics (MDPI), 2025
+	InSDN, CICIDS2018 (surveyed)
+	Metrics of surveyed papers
+	Review; no new results. Standard action is controller blocking.
+	Yes (survey)
+	Shows controller blocking is standard
+	No local enforcement or timing
+	5. Smart city IoT security
+	[19] Interpretable FL IDS for Smart Cities, CMC, 2025
+	Not reported
+	Detection accuracy; miss rate
+	Global model accuracy 98.51% with a miss rate of 1.49%.
+	None. The paper says poor interpretability slows down response, but no response is built.
+	Moves feature selection itself into the federated loop, in a clear smart city setting
+	No latency measurement and no mitigation.
+	[20] Priyadarshini, BDCC, 2024
+	Smart city IoT attack datasets
+	Precision, recall, F1, accuracy, training and deployment time
+	Concludes that federated learning and split learning keep privacy while still detecting well. Exact values are not given in the abstract.
+	None
+	Reports deployment time, which most papers in this area do not
+	No response step. Detection time is not broken down.
+	6.Other sources used in the Introduction
+	[21] Edge-IIoTset, IEEE Access, 2022
+	Edge-IIoTset (created here)
+	Baseline ML and DL, centralized and federated
+	IoT/IIoT testbed dataset; 61 features chosen from 1176. Baseline values not available.
+	None; dataset paper
+	Dataset built for centralized and federated use
+	Testbed, not a real city
+	[22] McMahan et al., FedAvg, AISTATS, 2017
+	MNIST; CIFAR-10; language task
+	Accuracy vs communication rounds
+	FedAvg needs 10-100x fewer rounds than synchronized SGD; tested on non-IID splits.
+	None; algorithm paper
+	Defines FedAvg
+	Not about IDS or IoT
+	[23] Puccetti and Ceccarelli, arXiv:2402.09082, 2024
+	Railway on-board system; Industrial IoT edge device
+	Detection delay, FPR, precision, coverage
+	Detection delay is overlooked; the paper links FPR to delay.
+	None; evaluation paper
+	Support for reporting detection latency
+	Stops at detection; no response time
+	
+
+INTRODUCTION
+
+
+Cities put more and more sensors into their utility systems. Water meters, heat meters, street lights and building controls are now networked devices spread across a city and run by utility operators. These devices bring real benefits, but they also open the city up to attack. There are many of them, they sit in places people can reach, they are rarely updated, and each one is too small to run normal security software. If an attacker succeeds, the problem is not only stolen data. A service that residents depend on can stop working.
+The usual answer is a central intrusion detection system. Traffic is sent from the field to a central server, the server classifies it, and an alert is raised. This design has three known problems in a city-wide network. First, every decision waits for the traffic to travel to the centre, and the response has to travel back, so the delay is paid twice. Second, sending raw traffic all the time uses up uplink bandwidth, and in a utility network those flows can show when a building is occupied or how much it consumes, which raises privacy concerns. Third, the central server is a single point of failure for the whole system.
+Two lines of research deal with these problems. The first one moves detection to the edge of the network. Recent work shows that detection models can run on gateway-class hardware, but the speed depends strongly on the model. A lightweight two-stage detector needs 26.66 microseconds per flow on a Raspberry Pi 3 [8]. A quantized temporal convolutional network needs 0.19 ms on a Raspberry Pi 4 [10]. A tuned tree ensemble needs 4.3 ms on a Raspberry Pi 5 [9], and an adaptive online model needs 34.8 ms on the same class of device [11]. At the architecture level, a micro-edge design reports about 50 ms detection latency, against about 200 ms for a gateway and 500 ms for the cloud on similar smart city traffic [7]. These gains are not automatic. A hybrid TinyML detector on the same kind of hardware needs 120-180 ms per sample, and its authors say this is too slow for strict real-time use [12]. So the speed comes from the pair of model and device, not from the word "edge".
+The second line removes the need to send raw traffic at all. Federated learning trains one shared model across many nodes by exchanging model parameters instead of data [22]. The common finding is that this costs very little accuracy. One method reaches 94.5% accuracy on Edge-IIoTset and 99.2% on CIC-IoT2023, and reports a federated-to-centralized comparison of 92.49% against 93.92% on the first dataset [1]. A systematic benchmark of FedAvg, FedProx and FedNova on Edge-IIoTset, CIC-IoT2023 and TII-SSRC-23 reports F1 of 93.0% for FedAvg and 94.0% for FedProx on Edge-IIoTset, and shows that FedNova reaches the target accuracy in about a third of the rounds while sending 15-25% less data [2]. Similar results appear on ToN_IoT, CICIDS2017 and UNSW-NB15 [3]. In smart city settings, a federated detector reaches 98.51% accuracy with a 1.49% miss rate while keeping feature selection decentralized [19], and federated learning has been compared with split learning on urban IoT attack data [20]. The open question in this line is data heterogeneity: when clients see different data, the choice of aggregation rule stops being neutral [2].
+Work that combines both ideas already exists, and we state this clearly. HED-ID trains a stacked BiGRU with temporal and spatial attention using federated averaging across ten non-IID clients, runs it on constrained hardware, and reports 95.6% accuracy on a server, 93.8% on a Raspberry Pi 4, and 18-22 ms inference latency [6]. FLEX-IDS adds explanations and adversarial robustness in an Edge-of-Things setting [5], and federated training at IoT edge nodes has been studied on its own [4]. The attention part is also well established. Attention-based GRU models reach F1 98.94% on BoT-IoT [13] and F1 0.946 on Edge-IIoTset [14], and one study reports 99% accuracy on ToN-IoT with a classification time of 0.075-0.3 ms, against 0.489-0.55 ms for a plain GRU [15]. For this reason we do not claim that combining federated learning, attention and edge deployment is new.
+What gets much less attention is the step after detection. In the edge papers [6]-[12], the pipeline ends at a decision: latency is measured up to the alert, and no action follows. In the federated papers [1]-[5], detection quality is measured but latency is usually not reported at all. Where automatic response does exist, it is placed centrally. Federated reinforcement learning produces mitigation policies that run on SDN controllers, with 95.1% detection accuracy across twenty controllers [17]. Collaborative federated defense blocks attacks through cooperation between autonomous systems [16]. A recent review shows that the standard pattern in software-defined networks is for the controller to block a port and unblock it later [18]. In all of these, the action is taken by the same kind of central element that edge deployment was meant to avoid. Outside intrusion detection, researchers have also argued that detection latency is an under-reported metric [23].
+As a result, few studies measure the complete path from attack traffic, through detection at the edge and a security decision, to an action that is actually applied, and report how long that path takes. This paper looks at that path. We propose a federated edge-based intrusion detection system. A GRU-Attention model is trained across simulated edge nodes with federated averaging, runs locally on each node, and is connected to a simple three-level policy: allow, quarantine, block. The action is applied on the node that made the detection. No raw traffic leaves the node, and no alert is sent to a central component before the action is taken. We evaluate the system on Edge-IIoTset [21] with both IID and non-IID client splits.
+We make four contributions. First, we describe an architecture where federated training, local detection and local mitigation are closed on a single simulated edge node, and we give the rule that turns a model output into an action. Second, we compare centralized and federated training of the same GRU-Attention model under IID and non-IID splits. We treat this as a check before edge deployment, not as a contribution of its own. Third, we define and measure a latency framework that separates detection latency, mitigation latency and end-to-end detection-to-response latency. Fourth, we compare local response with an emulated central response under the same network conditions, which separates the effect of where the response happens from the effect of how the model was trained.
+The paper is organised as follows. Section 2 reviews related work. Section 3 states the gap and our contributions. Section 4 presents the architecture. Section 5 describes the federated IDS and Section 6 the mitigation mechanism. Section 7 gives the experimental setup, Section 8 the results and Section 9 the discussion. Section 10 lists the limitations and Section 11 concludes.

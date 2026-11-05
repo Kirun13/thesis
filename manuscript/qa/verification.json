@@ -1,0 +1,12 @@
+{
+  "pages": 12,
+  "tables": 9,
+  "all_table_cell_text_survives_pdf_render": true,
+  "all_pages_visually_reviewed": true,
+  "title_border_removed": true,
+  "page_numbers_present": true,
+  "no_tracked_revisions": true,
+  "docx_sha256": "8d528c8f23e926514136ca34683076c1a9b5822daa8a8d810f0ee0fe50e7d3c1",
+  "rendering": "Bundled Python and Poppler with packaged render_docx.py; isolated existing applied-soft-doc-render image provides /usr/bin/soffice because Windows runtime has no bundled LibreOffice.",
+  "remaining_editorial_scope": "Expand and verify Related Work; journal-specific formatting and author metadata."
+}

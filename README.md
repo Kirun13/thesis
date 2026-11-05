@@ -49,3 +49,18 @@ npm run response:run -- --resume runs/response/EXISTING-FULL-RUN
 Completed pairs are retained, including failed outcomes; partial pairs are repeated in a new recorded segment. Source and model/data checksums must match. Rerun smoke after changing the network service code. This experiment prevents idle sleep while active but does not override closing the lid or explicit sleep.
 
 The measured primary duration starts after a standardized feature record is ready at edge and ends when the firewall command returns. Separate UDP packets and kernel DROP counters verify filtering. This does not measure live packet capture/feature extraction and does not classify the generated UDP probe bytes. No ports are published on the host; only the dedicated containers' network namespaces are modified.
+
+## Traffic-linked MQTT extension
+
+Completed results: runs/online/final-v1/RESULTS.md, system-episodes.csv, paired-conditions.csv and service-and-response.png. Read ONLINE_PROTOCOL.md and PAPER_ALIGNMENT.md before using these results in the paper. The new 12-feature causal detector is separately trained from the earlier 34-feature public-data model. Sixty system condition episodes completed; 58 have valid capture/label reconstructions. Failed capture outcomes are preserved.
+
+Regenerate the report from the existing records:
+
+```powershell
+npm run online:report
+npm run check
+```
+
+Collection/training entrypoints are online:build, online:collect, online:study, online:smoke and online:system. The frozen episode plan, source snapshots, 21 exported models and raw evidence are already saved. Do not regenerate the plan or change recipes to improve held-out scores. A new scientific run needs a separately versioned plan and output location. The online Docker image extends thesis-response:local. Completed episodes are skipped, incomplete episodes stop execution rather than being overwritten.
+
+Final provenance verification while the dedicated services are running: `python scripts/verify_online.py`. It checks matched preplanned schedules, all assigned ledger entries, unchanged frozen source, running image/source equality, clock-domain compatibility and training/test episode separation. Its saved result distinguishes a passing ledger audit from the two capture reconstruction failures. Environment metadata and artifact hashes are under final-v1. `npm run online:down` stops only this experiment's Compose project.

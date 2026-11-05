@@ -1,0 +1,25 @@
+{
+  "document": "manuscript\\Federated_Edge_IDS_Manuscript_v1.docx",
+  "language": "English",
+  "scope": "Evidence-aligned local manuscript with Methods Results Discussion; literature review requires expansion.",
+  "evidence": [
+    "runs\\online\\final-v1\\summary.json",
+    "ONLINE_PROTOCOL.md",
+    "PROTOCOL.md",
+    "RESPONSE_PROTOCOL.md",
+    "runs/response/full-20261104T153359Z/RESULTS.md",
+    "runs/overnight-2026-11-04T14-57-07-088Z/summary.csv",
+    "runs/extension-audit/excluded-cohort-sensitivity.json",
+    "data/processed/audit.json",
+    "data/online/dataset-audit.json",
+    "runs/online/final-v1/final-verification.json"
+  ],
+  "source_document": "https://docs.google.com/document/d/1la7B88pgKXWi5_aZNUsmOoPmb0W4u3pBFf1aco5NBnI/edit",
+  "verified_external_references": [
+    "https://proceedings.mlr.press/v54/mcmahan17a.html",
+    "https://doi.org/10.1109/ACCESS.2022.3165809"
+  ],
+  "tables": 9,
+  "main_text_word_count": 4593,
+  "docx_sha256": "8d528c8f23e926514136ca34683076c1a9b5822daa8a8d810f0ee0fe50e7d3c1"
+}
