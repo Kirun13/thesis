@@ -1,0 +1,151 @@
+{
+  "features": [
+    "log_packet_rate",
+    "log_byte_rate",
+    "mean_frame_bytes",
+    "std_frame_bytes",
+    "mean_iat_ms",
+    "std_iat_ms",
+    "syn_fraction",
+    "ack_fraction",
+    "rst_fraction",
+    "log_source_port_count",
+    "mean_tcp_payload_bytes",
+    "payload_packet_fraction"
+  ],
+  "means": [
+    3.6822922229766846,
+    9.245086669921875,
+    277.9321594238281,
+    10.845697402954102,
+    46.208248138427734,
+    2.648458242416382,
+    0.0042113964445889,
+    0.99578857421875,
+    0.0,
+    0.6931471824645996,
+    211.89846801757812,
+    0.972804069519043
+  ],
+  "scales": [
+    1.446040391921997,
+    1.5030204057693481,
+    51.50897216796875,
+    50.497398376464844,
+    31.93367576599121,
+    8.579423904418945,
+    0.02169516682624817,
+    0.02169516682624817,
+    1.0,
+    1.0,
+    51.56856155395508,
+    0.10054603964090347
+  ],
+  "models": [
+    {
+      "id": "mlp-central-s42",
+      "file": "mlp-central-s42.pt",
+      "threshold": 0.8214665055274963
+    },
+    {
+      "id": "mlp-central-s43",
+      "file": "mlp-central-s43.pt",
+      "threshold": 0.8492985963821411
+    },
+    {
+      "id": "mlp-central-s44",
+      "file": "mlp-central-s44.pt",
+      "threshold": 0.797282338142395
+    },
+    {
+      "id": "gru-central-s42",
+      "file": "gru-central-s42.pt",
+      "threshold": 0.9440827965736389
+    },
+    {
+      "id": "gru-central-s43",
+      "file": "gru-central-s43.pt",
+      "threshold": 0.8756256699562073
+    },
+    {
+      "id": "gru-central-s44",
+      "file": "gru-central-s44.pt",
+      "threshold": 0.9426498413085938
+    },
+    {
+      "id": "fedmlp-iid-p42-s42",
+      "file": "fedmlp-iid-p42-s42.pt",
+      "threshold": 0.8315700888633728
+    },
+    {
+      "id": "fedmlp-iid-p42-s43",
+      "file": "fedmlp-iid-p42-s43.pt",
+      "threshold": 0.8435795903205872
+    },
+    {
+      "id": "fedmlp-iid-p42-s44",
+      "file": "fedmlp-iid-p42-s44.pt",
+      "threshold": 0.8395679593086243
+    },
+    {
+      "id": "fedmlp-noniid-p42-s42",
+      "file": "fedmlp-noniid-p42-s42.pt",
+      "threshold": 0.4991425573825836
+    },
+    {
+      "id": "fedmlp-noniid-p42-s43",
+      "file": "fedmlp-noniid-p42-s43.pt",
+      "threshold": 0.4110008478164673
+    },
+    {
+      "id": "fedmlp-noniid-p42-s44",
+      "file": "fedmlp-noniid-p42-s44.pt",
+      "threshold": 0.3369319438934326
+    },
+    {
+      "id": "fedmlp-noniid-p43-s42",
+      "file": "fedmlp-noniid-p43-s42.pt",
+      "threshold": 0.04500294476747513
+    },
+    {
+      "id": "fedmlp-noniid-p43-s43",
+      "file": "fedmlp-noniid-p43-s43.pt",
+      "threshold": 0.05045310780405998
+    },
+    {
+      "id": "fedmlp-noniid-p43-s44",
+      "file": "fedmlp-noniid-p43-s44.pt",
+      "threshold": 0.07447890192270279
+    },
+    {
+      "id": "fedmlp-noniid-p44-s42",
+      "file": "fedmlp-noniid-p44-s42.pt",
+      "threshold": 0.649242639541626
+    },
+    {
+      "id": "fedmlp-noniid-p44-s43",
+      "file": "fedmlp-noniid-p44-s43.pt",
+      "threshold": 0.4987727701663971
+    },
+    {
+      "id": "fedmlp-noniid-p44-s44",
+      "file": "fedmlp-noniid-p44-s44.pt",
+      "threshold": 0.6721460819244385
+    },
+    {
+      "id": "fedgru-noniid-p42-s42",
+      "file": "fedgru-noniid-p42-s42.pt",
+      "threshold": 0.13404271006584167
+    },
+    {
+      "id": "fedgru-noniid-p42-s43",
+      "file": "fedgru-noniid-p42-s43.pt",
+      "threshold": 0.20918549597263336
+    },
+    {
+      "id": "fedgru-noniid-p42-s44",
+      "file": "fedgru-noniid-p42-s44.pt",
+      "threshold": 0.07177380472421646
+    }
+  ]
+}

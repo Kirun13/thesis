@@ -52,7 +52,7 @@ def main():
     target.mkdir(exist_ok=True)
     source_files = [ROOT / 'response/lab.py', ROOT / 'response/Dockerfile', ROOT / 'response/compose.yaml',
                     ROOT / 'scripts/response.py', ROOT / 'scripts/report_response.py',
-                    ROOT / 'scripts/prepare_response.py', ROOT / 'PLAN_RESPONSE.md', ROOT / 'REVIEW_RESPONSE.md']
+                    ROOT / 'scripts/prepare_response.py', ROOT / 'RESPONSE_PROTOCOL.md']
     checksums = {str(path.relative_to(ROOT)): checksum(path) for path in source_files}
     if (target / 'source-checksums.json').exists():
         assert json.loads((target / 'source-checksums.json').read_text()) == checksums, 'Source changed since run.'

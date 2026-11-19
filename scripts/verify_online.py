@@ -90,7 +90,7 @@ def main():
         if path.is_file():
             artifact_hashes[str(path.relative_to(ROOT))] = sha(path)
     for name in ['scripts/report_online.py', 'scripts/audit_excluded.py', 'scripts/verify_online.py',
-                 'PAPER_ALIGNMENT.md', 'REVIEW_ONLINE.md', 'EXPERIMENTS_STATUS.md', 'README.md',
+                 'README.md',
                  'runs/extension-audit/original-data-audit.json', 'runs/extension-audit/pcap-extractor-gate.json',
                  'runs/extension-audit/excluded-cohort-sensitivity.json', 'runs/extension-audit/EXCLUDED_SENSITIVITY.md']:
         path = ROOT / name

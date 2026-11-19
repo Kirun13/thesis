@@ -4,7 +4,7 @@
 
 For a fixed edge detector and policy, what additional response delay is introduced by a controller round trip? Evaluate local versus controller-mediated decision making on a single virtualized Docker Desktop laptop. This is a systems experiment using replayed standardized feature observations from Edge-IIoTset and separate synthetic UDP probes for enforcement verification. The model does not classify the probe payloads. Raw packet capture, online feature extraction, feature preprocessing, physical IoT hardware, real city traffic and saturated-load behaviour are outside this experiment.
 
-The independent planning review and its accepted changes are recorded in REVIEW_RESPONSE.md and PLAN_RESPONSE.md. Model training, split construction and detection metrics remain described by PROTOCOL.md and the unchanged experiment-1 outputs.
+Model training, split construction and detection metrics are defined in PROTOCOL.md.
 
 ## Frozen artifacts and selection
 

@@ -1,0 +1,28 @@
+{
+  "ledger_audit_passed": true,
+  "assigned_completed": 60,
+  "valid_capture_label_reconstructions": 58,
+  "invalid_reconstructions": [
+    {
+      "episode_id": "system-08-d50-local",
+      "issues": "kernel_drops,mqtt_parse_errors"
+    },
+    {
+      "episode_id": "system-08-d50-none",
+      "issues": "kernel_drops,late_packets,missing_tcp_bytes,mqtt_parse_errors,feature_parity"
+    }
+  ],
+  "all_invalid_episodes_retained": true,
+  "invalid_latencies_excluded_from_primary_summary": true,
+  "independent_regular_workloads": 9,
+  "independent_outage_workloads": 3,
+  "matched_offered_schedules_equal": true,
+  "frozen_sources_unchanged": true,
+  "running_image_matches_reviewed_source": true,
+  "image_id": "sha256:105c09b882d68d1ced6588beac5aeef3ffff06262c15bf040b7ddbdc6a77964d",
+  "maximum_clock_conversion_uncertainty_ns": 10410,
+  "shared_kernel_equal_monotonic_offsets": true,
+  "neural_training_runs": 21,
+  "additional_rate_baseline": 1,
+  "scope": "Ledger/provenance passed; capture validity is explicitly 58/60, not an all-capture pass."
+}

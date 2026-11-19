@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "assigned_trials": 3600,
+  "verified_terminal_trials": 3600,
+  "verified_pairs": 1800,
+  "drop_health_reset_verified": true,
+  "source_hashes_verified": true,
+  "no_incomplete_trials": true,
+  "no_superseded_attempts": true
+}

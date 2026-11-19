@@ -1,0 +1,31 @@
+{
+  "attack_arrival_to_command_ms@0ms": {
+    "pairs": 7,
+    "median_difference": 0.2581160000000011,
+    "min": -3.2281050000000278,
+    "max": 4.895789000000001,
+    "wilcoxon_exact_p": 0.46875
+  },
+  "attack_arrival_to_command_ms@50ms": {
+    "pairs": 6,
+    "median_difference": 99.27187099999999,
+    "min": 93.83908699999995,
+    "max": 103.943718,
+    "wilcoxon_exact_p": 0.03125
+  },
+  "attack_messages_received_before_command@0ms": {
+    "pairs": 7,
+    "median_difference": 0,
+    "min": -71,
+    "max": 2,
+    "wilcoxon_exact_p": 0.5625
+  },
+  "attack_messages_received_before_command@50ms": {
+    "pairs": 6,
+    "median_difference": 77.0,
+    "min": 20,
+    "max": 307,
+    "wilcoxon_exact_p": 0.03125
+  },
+  "worst_benign_delivery_ratio_with_mitigation": 0.8612836438923396
+}

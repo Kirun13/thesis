@@ -13,3 +13,6 @@ node_modules/
 manuscript/qa/*
 !manuscript/qa/verification.json
 ~$*
+
+# Manuscript drafts stay local until publication (similarity checks); paper figures and stats live in results/
+manuscript/

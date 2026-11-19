@@ -1,4 +1,4 @@
-"""Isolated feature-replay / kernel enforcement benchmark. See PLAN_RESPONSE.md."""
+"""Isolated feature-replay / kernel enforcement benchmark. See RESPONSE_PROTOCOL.md."""
 import json
 import hashlib
 import math

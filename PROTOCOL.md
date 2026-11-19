@@ -37,5 +37,3 @@ Batch-1 model-only inference: 30 warmups, 200 timed samples, device synchronizat
 ## Execution and recovery
 
 Smoke profile: two steps, at most 512 records per client, one seed, validation only. Its metrics are debugging evidence, not paper results. Full profile uses the audited data and fixed settings above. Save config, source snapshot, package versions, data checksum, per-step logs, best and last checkpoint, test predictions, and results. Run at most ten hours per invocation. Resume from a completed checkpoint after interruption; a partial round is repeated. No test-based tuning.
-
-The next experiment must compare local and central enforcement using the SAME frozen model and controlled network delays, verify actual packet drops, and distinguish observation/feature-window delay, preprocessing, inference, policy, and rule enforcement. Container traffic can validate enforcement; it should not silently replace the benchmark training data or be described as real city traffic.

@@ -1,0 +1,10 @@
+seed,one_way_delay_ms,assigned_pairs,completed_pairs,comparable_block_pairs,excluded_from_block_latency,paired_delta_median_ms,paired_delta_p95_ms,decision_disagreements,exclusion_status_pairs
+42,0,200,200,101,99,0.4193869999999995,1.5904650000000005,0,{'ok_allow/ok_allow': 99}
+42,10,200,200,101,99,20.799013000000002,22.223016,0,{'ok_allow/ok_allow': 99}
+42,50,200,200,101,99,100.93472100000001,102.287393,0,{'ok_allow/ok_allow': 99}
+43,0,200,200,100,100,0.4176834999999999,1.5838899,0,{'ok_allow/ok_allow': 100}
+43,10,200,200,100,100,20.797353,22.32321555,0,{'ok_allow/ok_allow': 100}
+43,50,200,200,100,100,100.874935,102.22313890000001,0,{'ok_allow/ok_allow': 100}
+44,0,200,200,100,100,0.4878720000000001,1.5432073499999999,0,{'ok_allow/ok_allow': 100}
+44,10,200,200,100,100,20.896275,22.12767915,0,{'ok_allow/ok_allow': 100}
+44,50,200,200,100,100,100.925017,102.08706645000001,0,{'ok_allow/ok_allow': 100}
